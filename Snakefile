@@ -2,13 +2,12 @@ import subprocess
 import os
 import collections
 
-configfile: "config.yaml"
+configfile: "config/config.yaml"
 
 # chroms = config["chroms"]
 chroms = ["chr" + str(e) for e in list(range(1,23))]
 print(chroms)
 
-# folder = "/g/korbel/weber/MosaiCatcher_files/EXTERNAL_DATA/snv_sites_to_genotype/1000G_SNV_with_GT"
 # folder = "/scratch/tweber/DATA/NYGC_1KGP"
 # folder = "/g/korbel/weber/MosaiCatcher_files/EXTERNAL_DATA/snv_sites_to_genotype/1000G_SNV_with_GT"
 folder = "/scratch/tweber/DATA/1000G_SNV_with_GT"
@@ -53,23 +52,11 @@ def get_mem_mb(wildcards, attempt):
 
 rule all:
     input:
-            # "{folder}/PANDAS/{sample}.tsv.gz", folder=folder, chrom=chroms, sample=list(set(samples[:100] + ["HG00268","HG00512","HG00514","HG00731","HG01352","HG02059","HG02818","NA12878","NA19239","NA19240"]))
-            # "{folder}/PANDAS/{sample}.tsv.gz", folder=folder, chrom=["1"], sample=samples[:2]
-            # expand("{folder}/AGGR/1000G_rare_het.vcf.gz", folder=folder)
-            # "{folder}/AGGR.tsv.gz", folder=folder, chrom=["chr21"],
-            # "{folder}/GENOTYPING/HG00512.vcf.gz", folder=folder, chrom=["chr1"]
-            # "{folder}/ISEC/HG00512_{sample}", folder=folder, sample=sample_list, chrom=chroms
-        # [
-        #     expand(
-        #     "{folder}/ANALYSIS/{sample_target}_{cell_id}_detailed.tsv", folder=folder, sample_target=sample_target, cell_id=sample_target_dict[sample_target]
-        #     ) for sample_target in sample_target_dict
-        # ]
         [
             expand(
             "{folder}/ISEC/{sample_target}_{cell_id}/{sample}/0002.vcf", folder=folder, sample=sample_list, sample_target=sample_target, cell_id=sample_target_dict[sample_target]
             ) for sample_target in sample_target_dict
         ]
-        # expand("{folder}/BCFTOOLS/CHRFREE/{sample}.vcf.gz.tbi", folder=folder, sample=sample_list)
 
 
 # rule retrieve_rare_variants_bcftools:
@@ -80,7 +67,7 @@ rule all:
 #     output:
 #         "{folder}/BCFTOOLS/{sample}.vcf.gz"
 #     conda:
-#         "snp.yaml"
+#         "envs/snp.yaml"
 #     envmodules:
 #         "BCFtools/1.14-GCC-11.2.0"
 #     threads: 1
@@ -107,7 +94,7 @@ rule all:
 #     resources:
 #         time="01:00:00",
 #     script:
-#         "config_agg_bcftools.py"
+#         "scripts/config_agg_bcftools.py"
 #         # "ls {input.vcf} | grep {wildcards.chrom} > {output}"
 
 # rule merge_bcftools:
@@ -118,7 +105,7 @@ rule all:
 #     log:
 #         "{folder}/log/AGGR.log"
 #     conda:
-#         "snp.yaml"
+#         "envs/snp.yaml"
 #     envmodules:
 #         "BCFtools/1.14-GCC-11.2.0"
 #     threads: 1
@@ -137,7 +124,7 @@ rule concat_bcftools:
     log:
         "{folder}/log/BCFTOOLS/CHRFREE/{sample}.vcf.gz"
     conda:
-        "snp.yaml"
+        "envs/snp.yaml"
     envmodules:
         "BCFtools/1.14-GCC-11.2.0"
     threads: 1
@@ -168,16 +155,20 @@ rule regenotype_SNVs:
     resources:
         mem_mb=get_mem_mb_heavy,
         time="10:00:00",
+    threads: 16
     conda:
-        "snp.yaml"
+        "envs/snp.yaml"
     shell:
         """
-        freebayes \
+        /g/korbel2/weber/Gits/freebayes/scripts/freebayes-parallel <(/g/korbel2/weber/Gits/freebayes/scripts/fasta_generate_regions.py {input.fasta} 100000) {threads} \
             -f {input.fasta} \
             -@ {input.sites} \
             --only-use-input-alleles {input.bam} \
             --genotype-qualities \
+            --exclude-unobserved-genotypes \
         | bcftools view \
+            --threads {threads} \
+            --exclude-uncalled \
             --types snps \
             --genotype het \
             -Ov -o {output.vcf}
@@ -195,7 +186,7 @@ rule isec:
         isect_file="{folder}/ISEC/{sample_target}_{cell_id}/{sample}/0002.vcf",
         # t=touch("{folder}/ISECT/{sample_target}_{sample}.ok")
     conda:
-        "snp.yaml"
+        "envs/snp.yaml"
     threads: 1
     resources:
         mem_mb=get_mem_mb,
@@ -217,7 +208,7 @@ rule analyse_isec:
         mem_mb=64000,
         time="01:00:00",
     script:
-        "gather_isec.py"
+        "scripts/gather_isec.py"
 
 
 rule index_vcf:

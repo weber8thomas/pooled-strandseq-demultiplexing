@@ -4,5 +4,5 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - bcftools
-  - freebayes
+  - bcftools=1.9
+  - freebayes=1.1.0.46
