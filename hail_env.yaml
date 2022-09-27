@@ -1,0 +1,11 @@
+name: hail_env
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+  - pkgw-forge
+dependencies:
+  - python>=3.7
+  - pandas
+  - pip:
+      - hail
