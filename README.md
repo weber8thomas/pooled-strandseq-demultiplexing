@@ -17,3 +17,8 @@ Pipeline was created using [snakemake](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp
 ## Troubleshooting
 
 Main issue at the moment is the generation of the Directed Acyclic Graph (DAG) of execution, as each cell needs to be compared to 3202 samples. For a 96-well plate, the number of jobs to be done will be around 308k including one-to-one comparison and final analysis.
+
+## TODO
+
+- [ ] Split in 2 snakefiles: one complete & one to be bind to mosaicatcher pooling version
+- [ ] Simplify to reduce DAG time creation (lower AF, isec on a single file?)
