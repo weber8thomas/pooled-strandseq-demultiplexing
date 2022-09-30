@@ -1,0 +1,124 @@
+##fileformat=VCFv4.1
+##FILTER=<ID=PASS,Description="All filters passed">
+##contig=<ID=chr1>
+##INFO=<ID=AC,Number=A,Type=Integer,Description="Allele count in genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=AC_AFR,Number=A,Type=Integer,Description="Allele count in genotypes in AFR">
+##INFO=<ID=AC_AMR,Number=A,Type=Integer,Description="Allele count in genotypes in AMR">
+##INFO=<ID=AC_EAS,Number=A,Type=Integer,Description="Allele count in genotypes in EAS">
+##INFO=<ID=AC_EUR,Number=A,Type=Integer,Description="Allele count in genotypes in EUR">
+##INFO=<ID=AC_Het,Number=A,Type=Integer,Description="Allele counts in heterozygous genotypes">
+##INFO=<ID=AC_Het_AFR,Number=A,Type=Integer,Description="Allele counts in heterozygous genotypes in AFR">
+##INFO=<ID=AC_Het_AMR,Number=A,Type=Integer,Description="Allele counts in heterozygous genotypes in AMR">
+##INFO=<ID=AC_Het_EAS,Number=A,Type=Integer,Description="Allele counts in heterozygous genotypes in EAS">
+##INFO=<ID=AC_Het_EUR,Number=A,Type=Integer,Description="Allele counts in heterozygous genotypes in EUR">
+##INFO=<ID=AC_Het_SAS,Number=A,Type=Integer,Description="Allele counts in heterozygous genotypes in SAS">
+##INFO=<ID=AC_Hom,Number=A,Type=Integer,Description="Allele counts in homozygous genotypes">
+##INFO=<ID=AC_Hom_AFR,Number=A,Type=Integer,Description="Allele counts in homozygous genotypes in AFR">
+##INFO=<ID=AC_Hom_AMR,Number=A,Type=Integer,Description="Allele counts in homozygous genotypes in AMR">
+##INFO=<ID=AC_Hom_EAS,Number=A,Type=Integer,Description="Allele counts in homozygous genotypes in EAS">
+##INFO=<ID=AC_Hom_EUR,Number=A,Type=Integer,Description="Allele counts in homozygous genotypes in EUR">
+##INFO=<ID=AC_Hom_SAS,Number=A,Type=Integer,Description="Allele counts in homozygous genotypes in SAS">
+##INFO=<ID=AC_SAS,Number=A,Type=Integer,Description="Allele count in genotypes in SAS">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency, for each ALT allele, in the same order as listed">
+##INFO=<ID=AF_AFR,Number=A,Type=Float,Description="Allele frequency in AFR">
+##INFO=<ID=AF_AMR,Number=A,Type=Float,Description="Allele frequency in AMR">
+##INFO=<ID=AF_EAS,Number=A,Type=Float,Description="Allele frequency in EAS">
+##INFO=<ID=AF_EUR,Number=A,Type=Float,Description="Allele frequency in EUR">
+##INFO=<ID=AF_SAS,Number=A,Type=Float,Description="Allele frequency in SAS">
+##INFO=<ID=AN,Number=1,Type=Integer,Description="Total number of alleles in called genotypes">
+##INFO=<ID=AN_AFR,Number=1,Type=Integer,Description="Total number of alleles in called genotypes in AFR">
+##INFO=<ID=AN_AMR,Number=1,Type=Integer,Description="Total number of alleles in called genotypes in AMR">
+##INFO=<ID=AN_EAS,Number=1,Type=Integer,Description="Total number of alleles in called genotypes in EAS">
+##INFO=<ID=AN_EUR,Number=1,Type=Integer,Description="Total number of alleles in called genotypes in EUR">
+##INFO=<ID=AN_SAS,Number=1,Type=Integer,Description="Total number of alleles in called genotypes in SAS">
+##INFO=<ID=BaseQRankSum,Number=1,Type=Float,Description="Z-score from Wilcoxon rank sum test of Alt Vs. Ref base qualities">
+##INFO=<ID=ClippingRankSum,Number=1,Type=Float,Description="Z-score From Wilcoxon rank sum test of Alt vs. Ref number of hard clipped bases">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth; some reads may have been filtered">
+##INFO=<ID=DS,Number=0,Type=Flag,Description="Were any of the samples downsampled?">
+##INFO=<ID=END,Number=1,Type=Integer,Description="Stop position of the interval">
+##INFO=<ID=FS,Number=1,Type=Float,Description="Phred-scaled p-value using Fisher's exact test to detect strand bias">
+##INFO=<ID=HWE,Number=A,Type=Float,Description="HWE test (PMID:15789306); 1=good, 0=bad">
+##INFO=<ID=HWE_AFR,Number=A,Type=Float,Description="HWE test in AFR (PMID:15789306); 1=good, 0=bad">
+##INFO=<ID=HWE_AMR,Number=A,Type=Float,Description="HWE test in AMR (PMID:15789306); 1=good, 0=bad">
+##INFO=<ID=HWE_EAS,Number=A,Type=Float,Description="HWE test in EAS (PMID:15789306); 1=good, 0=bad">
+##INFO=<ID=HWE_EUR,Number=A,Type=Float,Description="HWE test in EUR (PMID:15789306); 1=good, 0=bad">
+##INFO=<ID=HWE_SAS,Number=A,Type=Float,Description="HWE test in SAS (PMID:15789306); 1=good, 0=bad">
+##INFO=<ID=HaplotypeScore,Number=1,Type=Float,Description="Consistency of the site with at most two segregating haplotypes">
+##INFO=<ID=InbreedingCoeff,Number=1,Type=Float,Description="Inbreeding coefficient as estimated from the genotype likelihoods per-sample when compared against the Hardy-Weinberg expectation">
+##INFO=<ID=MLEAC,Number=A,Type=Integer,Description="Maximum likelihood expectation (MLE) for the allele counts (not necessarily the same as the AC), for each ALT allele, in the same order as listed">
+##INFO=<ID=MLEAF,Number=A,Type=Float,Description="Maximum likelihood expectation (MLE) for the allele frequency (not necessarily the same as the AF), for each ALT allele, in the same order as listed">
+##INFO=<ID=MQ,Number=1,Type=Float,Description="RMS Mapping Quality">
+##INFO=<ID=MQ0,Number=1,Type=Integer,Description="Total Mapping Quality Zero Reads">
+##INFO=<ID=MQRankSum,Number=1,Type=Float,Description="Z-score From Wilcoxon rank sum test of Alt vs. Ref read mapping qualities">
+##INFO=<ID=NEGATIVE_TRAIN_SITE,Number=0,Type=Flag,Description="This variant was used to build the negative training set of bad variants">
+##INFO=<ID=POSITIVE_TRAIN_SITE,Number=0,Type=Flag,Description="This variant was used to build the positive training set of good variants">
+##INFO=<ID=QD,Number=1,Type=Float,Description="Variant Confidence/Quality by Depth">
+##INFO=<ID=RAW_MQ,Number=1,Type=Float,Description="Raw data for RMS Mapping Quality">
+##INFO=<ID=ReadPosRankSum,Number=1,Type=Float,Description="Z-score from Wilcoxon rank sum test of Alt vs. Ref read position bias">
+##INFO=<ID=SOR,Number=1,Type=Float,Description="Symmetric Odds Ratio of 2x2 contingency table to detect strand bias">
+##INFO=<ID=VQSLOD,Number=1,Type=Float,Description="Log odds of being a true variant versus being false under the trained gaussian mixture model">
+##INFO=<ID=VariantType,Number=1,Type=String,Description="Variant type description">
+##INFO=<ID=culprit,Number=1,Type=String,Description="The annotation which was the worst performing in the Gaussian mixture model, likely the reason why the variant was filtered out">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Phased Genotype">
+##INFO=<ID=AN_EUR_unrel,Number=1,Type=Integer,Description="Total number of alleles in called genotypes in EUR (2504 unrelated samples)">
+##INFO=<ID=AN_EAS_unrel,Number=1,Type=Integer,Description="Total number of alleles in called genotypes in EAS (2504 unrelated samples)">
+##INFO=<ID=AN_AMR_unrel,Number=1,Type=Integer,Description="Total number of alleles in called genotypes in AMR (2504 unrelated samples)">
+##INFO=<ID=AN_SAS_unrel,Number=1,Type=Integer,Description="Total number of alleles in called genotypes in SAS (2504 unrelated samples)">
+##INFO=<ID=AN_AFR_unrel,Number=1,Type=Integer,Description="Total number of alleles in called genotypes in AFR (2504 unrelated samples)">
+##INFO=<ID=AC_EUR_unrel,Number=A,Type=Integer,Description="Allele count in genotypes in EUR (2504 unrelated samples)">
+##INFO=<ID=AC_EAS_unrel,Number=A,Type=Integer,Description="Allele count in genotypes in EAS (2504 unrelated samples)">
+##INFO=<ID=AC_AMR_unrel,Number=A,Type=Integer,Description="Allele count in genotypes in AMR (2504 unrelated samples)">
+##INFO=<ID=AC_SAS_unrel,Number=A,Type=Integer,Description="Allele count in genotypes in SAS (2504 unrelated samples)">
+##INFO=<ID=AC_AFR_unrel,Number=A,Type=Integer,Description="Allele count in genotypes in AFR (2504 unrelated samples)">
+##INFO=<ID=AC_Hom_EUR_unrel,Number=A,Type=Integer,Description="Allele counts in homozygous genotypes in EUR (2504 unrelated samples)">
+##INFO=<ID=AC_Hom_EAS_unrel,Number=A,Type=Integer,Description="Allele counts in homozygous genotypes in EAS (2504 unrelated samples)">
+##INFO=<ID=AC_Hom_AMR_unrel,Number=A,Type=Integer,Description="Allele counts in homozygous genotypes in AMR (2504 unrelated samples)">
+##INFO=<ID=AC_Hom_SAS_unrel,Number=A,Type=Integer,Description="Allele counts in homozygous genotypes in SAS (2504 unrelated samples)">
+##INFO=<ID=AC_Hom_AFR_unrel,Number=A,Type=Integer,Description="Allele counts in homozygous genotypes in AFR (2504 unrelated samples)">
+##INFO=<ID=AC_Het_EUR_unrel,Number=A,Type=Integer,Description="Allele counts in heterozygous genotypes in EUR (2504 unrelated samples)">
+##INFO=<ID=AC_Het_EAS_unrel,Number=A,Type=Integer,Description="Allele counts in heterozygous genotypes in EAS (2504 unrelated samples)">
+##INFO=<ID=AC_Het_AMR_unrel,Number=A,Type=Integer,Description="Allele counts in heterozygous genotypes in AMR (2504 unrelated samples)">
+##INFO=<ID=AC_Het_SAS_unrel,Number=A,Type=Integer,Description="Allele counts in heterozygous genotypes in SAS (2504 unrelated samples)">
+##INFO=<ID=AC_Het_AFR_unrel,Number=A,Type=Integer,Description="Allele counts in heterozygous genotypes in AFR (2504 unrelated samples)">
+##INFO=<ID=AF_EUR_unrel,Number=A,Type=Float,Description="Allele frequency in EUR (2504 unrelated samples)">
+##INFO=<ID=AF_EAS_unrel,Number=A,Type=Float,Description="Allele frequency in EAS (2504 unrelated samples)">
+##INFO=<ID=AF_AMR_unrel,Number=A,Type=Float,Description="Allele frequency in AMR (2504 unrelated samples)">
+##INFO=<ID=AF_SAS_unrel,Number=A,Type=Float,Description="Allele frequency in SAS (2504 unrelated samples)">
+##INFO=<ID=AF_AFR_unrel,Number=A,Type=Float,Description="Allele frequency in AFR (2504 unrelated samples)">
+##INFO=<ID=ExcHet_EAS,Number=A,Type=Float,Description="Test excess heterozygosity in EAS; 1=good, 0=bad">
+##INFO=<ID=ExcHet_AMR,Number=A,Type=Float,Description="Test excess heterozygosity in AMR; 1=good, 0=bad">
+##INFO=<ID=ExcHet_EUR,Number=A,Type=Float,Description="Test excess heterozygosity in EUR; 1=good, 0=bad">
+##INFO=<ID=ExcHet_AFR,Number=A,Type=Float,Description="Test excess heterozygosity in AFR; 1=good, 0=bad">
+##INFO=<ID=ExcHet_SAS,Number=A,Type=Float,Description="Test excess heterozygosity in SAS; 1=good, 0=bad">
+##INFO=<ID=ExcHet,Number=A,Type=Float,Description="Test excess heterozygosity; 1=good, 0=bad">
+##bcftools_viewVersion=1.14+htslib-1.14
+##bcftools_viewCommand=view --threads 1 -i 'INFO/AC>0 & INFO/AF<0.01 & GT[125]="het"' /g/korbel/weber/MosaiCatcher_files/EXTERNAL_DATA/snv_sites_to_genotype/1000G_SNV_with_GT/CCDG_14151_B01_GRM_WGS_2020-08-05_chr1.filtered.shapeit2-duohmm-phased.vcf.gz; Date=Fri Sep 23 06:06:28 2022
+##contig=<ID=chr2>
+##contig=<ID=chr3>
+##contig=<ID=chr4>
+##contig=<ID=chr5>
+##contig=<ID=chr6>
+##contig=<ID=chr7>
+##contig=<ID=chr8>
+##contig=<ID=chr9>
+##contig=<ID=chr10>
+##contig=<ID=chr11>
+##contig=<ID=chr12>
+##contig=<ID=chr13>
+##contig=<ID=chr14>
+##contig=<ID=chr15>
+##contig=<ID=chr16>
+##contig=<ID=chr17>
+##contig=<ID=chr18>
+##contig=<ID=chr19>
+##contig=<ID=chr20>
+##contig=<ID=chr21>
+##contig=<ID=chr22>
+##bcftools_concatVersion=1.15.1+htslib-1.16
+##bcftools_concatCommand=concat /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr1/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr2/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr3/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr4/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr5/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr6/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr7/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr8/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr9/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr10/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr11/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr12/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr13/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr14/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr15/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr16/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr17/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr18/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr19/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr20/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr21/HG00309.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/chr22/HG00309.vcf.gz; Date=Thu Sep 29 15:26:53 2022
+##bcftools_isecVersion=1.9+htslib-1.9
+##bcftools_isecCommand=isec -n~ -w2 -p dir /scratch/tweber/DATA/1000G_SNV_with_GT/GENOTYPING/NA19239_055.vcf.gz /scratch/tweber/DATA/1000G_SNV_with_GT/BCFTOOLS/CHRFREE/HG00309.vcf.gz; Date=Thu Sep 29 17:02:20 2022
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	HG00309
+chr14	47761930	14:47761931:C:T	C	T	.	PASS	AC=35;AC_AFR=0;AC_AMR=1;AC_EAS=0;AC_EUR=34;AC_Het=31;AC_Het_AFR=0;AC_Het_AMR=1;AC_Het_EAS=0;AC_Het_EUR=30;AC_Het_SAS=0;AC_Hom=4;AC_Hom_AFR=0;AC_Hom_AMR=0;AC_Hom_EAS=0;AC_Hom_EUR=4;AC_Hom_SAS=0;AC_SAS=0;AF=0.00546533;AF_AFR=0;AF_AMR=0.00102041;AF_EAS=0;AF_EUR=0.0268562;AF_SAS=0;AN=6404;AN_AFR=1786;AN_AMR=980;AN_EAS=1170;AN_EUR=1266;AN_SAS=1202;BaseQRankSum=0.489;ClippingRankSum=0.066;DP=92875;FS=0;HWE=0.00365125;HWE_AFR=1;HWE_AMR=1;HWE_EAS=1;HWE_EUR=0.0691602;HWE_SAS=1;InbreedingCoeff=0.0565;MLEAC=34;MLEAF=0.005329;MQ=42.7;MQ0=0;MQRankSum=0.126;QD=13.88;ReadPosRankSum=0.933;SOR=0.731;VQSLOD=2.51;culprit=FS;AN_EUR_unrel=1006;AN_EAS_unrel=1008;AN_AMR_unrel=694;AN_SAS_unrel=978;AN_AFR_unrel=1322;AF_EUR_unrel=0.026839;AF_EAS_unrel=0;AF_AMR_unrel=0.00144092;AF_SAS_unrel=0;AF_AFR_unrel=0;AC_EUR_unrel=27;AC_EAS_unrel=0;AC_AMR_unrel=1;AC_SAS_unrel=0;AC_AFR_unrel=0;AC_Het_EUR_unrel=25;AC_Het_EAS_unrel=0;AC_Het_AMR_unrel=1;AC_Het_SAS_unrel=0;AC_Het_AFR_unrel=0;AC_Hom_EUR_unrel=2;AC_Hom_EAS_unrel=0;AC_Hom_AMR_unrel=0;AC_Hom_SAS_unrel=0;AC_Hom_AFR_unrel=0;ExcHet_EAS=1;ExcHet_AMR=1;ExcHet_EUR=0.992022;ExcHet_AFR=1;ExcHet_SAS=1;ExcHet=0.999911	GT	0|1
+chr15	53873869	15:53873869:T:C	T	C	.	PASS	AC=35;AC_AFR=6;AC_AMR=6;AC_EAS=2;AC_EUR=12;AC_Het=35;AC_Het_AFR=6;AC_Het_AMR=6;AC_Het_EAS=2;AC_Het_EUR=12;AC_Het_SAS=9;AC_Hom=0;AC_Hom_AFR=0;AC_Hom_AMR=0;AC_Hom_EAS=0;AC_Hom_EUR=0;AC_Hom_SAS=0;AC_SAS=9;AF=0.00546533;AF_AFR=0.00335946;AF_AMR=0.00612245;AF_EAS=0.0017094;AF_EUR=0.00947867;AF_SAS=0.00748752;AN=6404;AN_AFR=1786;AN_AMR=980;AN_EAS=1170;AN_EUR=1266;AN_SAS=1202;BaseQRankSum=0.449;ClippingRankSum=-0.102;DP=93277;FS=4.988;HWE=1;HWE_AFR=1;HWE_AMR=1;HWE_EAS=1;HWE_EUR=1;HWE_SAS=1;InbreedingCoeff=-0.2004;MLEAC=41;MLEAF=0.006402;MQ=59.9;MQ0=0;MQRankSum=0.048;NEGATIVE_TRAIN_SITE;QD=17.42;ReadPosRankSum=-0.829;SOR=0.955;VQSLOD=-1.748;culprit=MQ;AN_EUR_unrel=1006;AN_EAS_unrel=1008;AN_AMR_unrel=694;AN_SAS_unrel=978;AN_AFR_unrel=1322;AF_EUR_unrel=0.0119284;AF_EAS_unrel=0.00198413;AF_AMR_unrel=0.00576369;AF_SAS_unrel=0.00715746;AF_AFR_unrel=0.00302572;AC_EUR_unrel=12;AC_EAS_unrel=2;AC_AMR_unrel=4;AC_SAS_unrel=7;AC_AFR_unrel=4;AC_Het_EUR_unrel=12;AC_Het_EAS_unrel=2;AC_Het_AMR_unrel=4;AC_Het_SAS_unrel=7;AC_Het_AFR_unrel=4;AC_Hom_EUR_unrel=0;AC_Hom_EAS_unrel=0;AC_Hom_AMR_unrel=0;AC_Hom_SAS_unrel=0;AC_Hom_AFR_unrel=0;ExcHet_EAS=0.999145;ExcHet_AMR=0.984725;ExcHet_EUR=0.948749;ExcHet_AFR=0.991611;ExcHet_SAS=0.970287;ExcHet=0.910816	GT	0|1
+chr16	89617667	16:89617667:G:A	G	A	.	PASS	AC=26;AC_AFR=11;AC_AMR=5;AC_EAS=2;AC_EUR=4;AC_Het=26;AC_Het_AFR=11;AC_Het_AMR=5;AC_Het_EAS=2;AC_Het_EUR=4;AC_Het_SAS=4;AC_Hom=0;AC_Hom_AFR=0;AC_Hom_AMR=0;AC_Hom_EAS=0;AC_Hom_EUR=0;AC_Hom_SAS=0;AC_SAS=4;AF=0.00405996;AF_AFR=0.00615901;AF_AMR=0.00510204;AF_EAS=0.0017094;AF_EUR=0.00315956;AF_SAS=0.00332779;AN=6404;AN_AFR=1786;AN_AMR=980;AN_EAS=1170;AN_EUR=1266;AN_SAS=1202;BaseQRankSum=0.578;ClippingRankSum=-0.038;DP=224636;FS=6.42;HWE=1;HWE_AFR=1;HWE_AMR=1;HWE_EAS=1;HWE_EUR=1;HWE_SAS=1;InbreedingCoeff=0.0808;MLEAC=42;MLEAF=0.006563;MQ=40.89;MQ0=0;MQRankSum=-0.361;QD=11.9;ReadPosRankSum=-0.299;SOR=0.419;VQSLOD=-13.47;culprit=DP;AN_EUR_unrel=1006;AN_EAS_unrel=1008;AN_AMR_unrel=694;AN_SAS_unrel=978;AN_AFR_unrel=1322;AF_EUR_unrel=0.00397614;AF_EAS_unrel=0.00198413;AF_AMR_unrel=0.00432277;AF_SAS_unrel=0.00408998;AF_AFR_unrel=0.00680787;AC_EUR_unrel=4;AC_EAS_unrel=2;AC_AMR_unrel=3;AC_SAS_unrel=4;AC_AFR_unrel=9;AC_Het_EUR_unrel=4;AC_Het_EAS_unrel=2;AC_Het_AMR_unrel=3;AC_Het_SAS_unrel=4;AC_Het_AFR_unrel=9;AC_Hom_EUR_unrel=0;AC_Hom_EAS_unrel=0;AC_Hom_AMR_unrel=0;AC_Hom_SAS_unrel=0;AC_Hom_AFR_unrel=0;ExcHet_EAS=0.999145;ExcHet_AMR=0.989801;ExcHet_EUR=0.995259;ExcHet_AFR=0.969498;ExcHet_SAS=0.995006;ExcHet=0.950324	GT	1|0
