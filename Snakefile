@@ -23,12 +23,14 @@ hgsvc_samples = ["HG00155", "HG00186", "HG00233", "HG00267", "HG00423", "HG00480
 pool_samples = ["HG00268", "HG00512", "HG00514", "HG00731", "HG01352", "HG02059", "HG02818", "NA12878", "NA19239", "NA19240",]
 
 
-sample_list = list(sorted(list(set([e for e in samples] + hgsvc_samples + pool_samples))))
+# sample_list = list(sorted(list(set([e for e in samples] + hgsvc_samples + pool_samples))))
+sample_list = pool_samples
 
 n_bottom = int(config["n"])
 n_up = 300 + n_bottom if n_bottom < (len(sample_list) - 300) else len(sample_list)
 
 # sample_list = sample_list[n_bottom: n_up]
+# sample_list = sample_list[:110]
 
 
 folder_target = "/g/korbel2/weber/MosaiCatcher_files/POOLING/PSEUDOPOOL/all"
@@ -64,14 +66,15 @@ localrules: concat_bcftools
 
 rule all:
     input:
-        # [
-        #     expand("{folder}/GENOTYPING/{sample_target}_{cell_id}.vcf.gz", folder=folder, chrom=chroms, sample=sample_list, sample_target=sample_target, cell_id=sample_target_dict[sample_target])
-        #     for sample_target in sample_target_dict
-        # ]
         [
-            expand("{folder}/COVERAGE/{sample_target}_{cell_id}.txt", folder=folder, sample_target=sample_target, cell_id=sample_target_dict[sample_target])
+            expand("{folder}/GENOTYPING_OTF/{sample_target}_{cell_id}.vcf.gz", folder=folder, chrom=chroms, sample=sample_list, sample_target=sample_target, cell_id=sample_target_dict[sample_target])
             for sample_target in sample_target_dict
         ]
+        # [
+        #     expand("{folder}/COVERAGE/{sample_target}_{cell_id}.txt", folder=folder, sample_target=sample_target, cell_id=sample_target_dict[sample_target])
+        #     for sample_target in sample_target_dict
+        # ]
+        # expand("{folder}/BCFTOOLS_CLEAN/merge.vcf.gz", folder=folder)
         # expand("{folder}/BCFTOOLS/CHRFREE/{sample}.vcf.gz", folder=folder, sample=sample_list)
         # [
         #     expand(
@@ -91,7 +94,7 @@ rule retrieve_rare_variants_bcftools:
         # onekgp= "{folder}/20201028_CCDG_14151_B01_GRM_WGS_2020-08-05_{chrom}.recalibrated_variants.vcf.gz"
         onekgp= expand("/g/korbel/weber/MosaiCatcher_files/EXTERNAL_DATA/snv_sites_to_genotype/1000G_SNV_with_GT/CCDG_14151_B01_GRM_WGS_2020-08-05_{chrom}.filtered.shapeit2-duohmm-phased.vcf.gz", chrom=chroms)
     output:
-        "{folder}/BCFTOOLS/CHRFREE/{sample}.vcf.gz"
+        "{folder}/BCFTOOLS_OTF/{sample}.vcf.gz"
     conda:
         "envs/snp.yaml"
     envmodules:
@@ -103,48 +106,85 @@ rule retrieve_rare_variants_bcftools:
     params:
         index=lambda wc: dict_samples[wc.sample],
         col_index=lambda wc: dict_samples[wc.sample] + 1 + 9, # +1 for python index +9 for the nine first cols
-        af=0.01
+        af=0.05
     shell:
         # "bcftools view -i 'INFO/AC>0 & INFO/AF<{params.af} & GT[{params.index}]=\"het\"' {input} | cut -f 1-8 | sed '/^#/! s/$/;SAMPLE={wildcards.sample}/' | bgzip > {output}"
         "bcftools view --threads {threads} -i 'INFO/AC>0 & INFO/AF<{params.af} & GT[{params.index}]=\"het\"' {input} | cut -f 1-9,{params.col_index} | bgzip > {output}"
 
 
-rule merge_bcftools:
-    input:
-        file_list = "{folder}/CONFIG/config.txt"
-    output:
-        "{folder}/AGGR/1000G_rare_het.vcf.gz"
-    log:
-        "{folder}/log/AGGR.log"
-    conda:
-        "envs/snp.yaml"
-    envmodules:
-        "BCFtools/1.14-GCC-11.2.0"
-    threads: 1
-    resources:
-        mem_mb=128000,
-        time="10:00:00",
-    shell:
-        "bcftools merge -l {input.file_list} | bcftools sort | bcftools norm -d none | cut -f -8 | bgzip > {output} 2> {log}"
+# rule merge_bcftools:
+#     input:
+#         file_list = "{folder}/CONFIG/config.txt"
+#     output:
+#         "{folder}/AGGR/1000G_rare_het.vcf.gz"
+#     log:
+#         "{folder}/log/AGGR.log"
+#     conda:
+#         "envs/snp.yaml"
+#     envmodules:
+#         "BCFtools/1.14-GCC-11.2.0"
+#     threads: 1
+#     resources:
+#         mem_mb=128000,
+#         time="10:00:00",
+#     shell:
+#         "bcftools merge -l {input.file_list} | bcftools sort | bcftools norm -d none | cut -f -8 | bgzip > {output} 2> {log}"
 
 
-rule concat_bcftools:
+# rule concat_bcftools:
+#     input:
+#         file_list = expand("{{folder}}/BCFTOOLS/{chrom}/{{sample}}.vcf.gz", chrom=chroms)
+#     output:
+#         "{folder}/BCFTOOLS/CHRFREE/{sample}.vcf.gz"
+#     log:
+#         "{folder}/log/BCFTOOLS/CHRFREE/{sample}.log"
+#     conda:
+#         "envs/snp.yaml"
+#     threads: 1
+#     resources:
+#         mem_mb=2000,
+#         time="10:00:00",
+#     shell:
+#         "bcftools concat {input.file_list} | bcftools sort -Oz -o {output} 2> {log}"
+
+
+rule concat_filter_bcftools:
     input:
-        file_list = expand("{{folder}}/BCFTOOLS/{chrom}/{{sample}}.vcf.gz", chrom=chroms)
+        "{folder}/BCFTOOLS_OTF/{sample}.vcf.gz"
     output:
-        "{folder}/BCFTOOLS/CHRFREE/{sample}.vcf.gz"
+        "{folder}/BCFTOOLS_CLEAN_OTF/SAMPLEWISE/{sample}.vcf.gz"
     log:
-        "{folder}/log/BCFTOOLS/CHRFREE/{sample}.log"
+        "{folder}/log/BCFTOOLS_CLEAN/{sample}.log"
     conda:
         "envs/snp.yaml"
     threads: 1
     resources:
         mem_mb=2000,
-        time="10:00:00",
+        # time="00:30:00",
     shell:
-        "bcftools concat {input.file_list} | bcftools sort -Oz -o {output} 2> {log}"
+        'bcftools view --type snps {input} | bcftools annotate -x "^INFO/AC,INFO/AF"  | cut -f 3,8 | sed "s/$/\\t{wildcards.sample}/g;s/AC=//g;s/AF=//g" |  grep -v "^#" | tail -n+2 | tr ";" "\\t" | bgzip > {output}'
 
 
+rule merge_concat_bcftools:
+    input:
+        expand("{folder}/BCFTOOLS_CLEAN_OTF/SAMPLEWISE/{sample}.vcf.gz", folder=folder, sample=sample_list)
+    output:
+        "{folder}/BCFTOOLS_CLEAN_OTF/merge.vcf.gz"
+    log:
+        "{folder}/log/BCFTOOLS_CLEAN/merge.log"
+    conda:
+        "mosaicatcher_env"
+    threads: 1
+    resources:
+        mem_mb=16000,
+        # time=":00:00",
+    script:
+        "scripts/merge_concat_bcftools.py"
+
+
+
+# NOTE: use custom fasta that covers contigs present in all libraries from pseudopool
+# fasta location: /g/korbel2/weber/MosaiCatcher_files/EXTERNAL_DATA/refgenomes_human_local/hg38.complete.fa
 rule regenotype_SNVs:
     """
     rule fct:
@@ -154,14 +194,16 @@ rule regenotype_SNVs:
     input:
         bam="/g/korbel2/weber/MosaiCatcher_files/POOLING/PSEUDOPOOL/all/{sample_target}_{cell_id}.sort.mdup.bam",
         bai="/g/korbel2/weber/MosaiCatcher_files/POOLING/PSEUDOPOOL/all/{sample_target}_{cell_id}.sort.mdup.bam.bai",
-        sites="{folder}/AGGR/1000G_rare_het_decompose.vcf.gz",
-        sites_index="{folder}/AGGR/1000G_rare_het_decompose.vcf.gz.tbi",
+        # sites="{folder}/AGGR/1000G_rare_het_decompose.vcf.gz",
+        sites="{folder}/BCFTOOLS_CLEAN_OTF/merge.vcf.gz",
+        # sites_index="{folder}/AGGR/1000G_rare_het_decompose.vcf.gz.tbi",
+        sites_index="{folder}/BCFTOOLS_CLEAN_OTF/merge.vcf.gz.tbi",
         # fasta="/g/korbel2/weber/workspace/mosaicatcher-update/workflow/data/ref_genomes/hg38.fa",
         fasta="/g/korbel2/weber/MosaiCatcher_files/EXTERNAL_DATA/refgenomes_human_local/hg38.complete.fa",
         # fasta_index="/g/korbel2/weber/workspace/mosaicatcher-update/workflow/data/ref_genomes/hg38.fa.fai",
         fasta_index="/g/korbel2/weber/MosaiCatcher_files/EXTERNAL_DATA/refgenomes_human_local/hg38.complete.fa.fai",
     output:
-        vcf="{folder}/GENOTYPING/{sample_target}_{cell_id}.vcf.gz",
+        vcf="{folder}/GENOTYPING_OTF/{sample_target}_{cell_id}.vcf.gz",
     log:
         vcf="{folder}/log/GENOTYPING/{sample_target}_{cell_id}.log",
     resources:
@@ -183,6 +225,7 @@ rule regenotype_SNVs:
             --exclude-uncalled \
             --types snps \
             --genotype het \
+            --include "QUAL>=10" \
             -Oz -o {output.vcf} 2> {log}
         """
         # """
@@ -199,45 +242,94 @@ rule regenotype_SNVs:
         #     -Oz -o {output.vcf}) 2> {log}
         # """
 
+# rule filter_SNVs:
+#     """
+#     rule fct:
+#     input:
+#     output:
+#     """
+#     input:
+#         vcf="{folder}/GENOTYPING/{sample_target}_{cell_id}.vcf.gz",
+#     output:
+#         vcf="{folder}/GENOTYPING_FILTER/{sample_target}_{cell_id}.vcf.gz",
+#     log:
+#         vcf="{folder}/log/GENOTYPING_FILTER/{sample_target}_{cell_id}.log",
+#     resources:
+#         mem_mb=get_mem_mb_heavy,
+#         time="20:00:00",
+#     threads: 32
+#     conda:
+#         "envs/snp.yaml"
+#     shell:
+#         """
+#         bcftools view \
+#             --threads {threads} \
+#             --exclude-uncalled \
+#             --types snps \
+#             --genotype het \
+#             --include "QUAL>=10" \
+#             -Oz -o {output.vcf} 2> {log}
+#         """
+
             
+# FROM ISEC DIRECTLY TO ISEC IN A PYTHON SCRIPT / PYTHON COMPARISON OF FILE 
+# rule isec:
+#     input:
+#         vcf="{folder}/GENOTYPING/{sample_target}_{cell_id}.vcf.gz",
+#         vcf_index="{folder}/GENOTYPING/{sample_target}_{cell_id}.vcf.gz.tbi",
+#         bcftools="{folder}/BCFTOOLS_CLEAN/{sample}.vcf.gz",
+#         bcftools_index="{folder}/BCFTOOLS_CLEAN/{sample}.vcf.gz.tbi"
+#     output:
+#         isec=directory("{folder}/ISEC/{sample_target}_{cell_id}/{sample}"),
+#         isec_file="{folder}/ISEC/{sample_target}_{cell_id}/{sample}/0001.vcf",
+#         # t=touch("{folder}/ISECT/{sample_target}_{sample}.ok")
+#     conda:
+#         "envs/snp.yaml"
+#     threads: 1
+#     resources:
+#         mem_mb=get_mem_mb,
+#         time="10:00:00",
+#     shell:
+#         "bcftools isec -w2 -n~11 -p {output.isec} {input.vcf} {input.bcftools}"
 
-rule isec:
-    input:
-        vcf="{folder}/GENOTYPING/{sample_target}_{cell_id}.vcf.gz",
-        vcf_index="{folder}/GENOTYPING/{sample_target}_{cell_id}.vcf.gz.tbi",
-        bcftools="{folder}/BCFTOOLS/CHRFREE/{sample}.vcf.gz",
-        bcftools_index="{folder}/BCFTOOLS/CHRFREE/{sample}.vcf.gz.tbi"
-    output:
-        isec=directory("{folder}/ISEC/{sample_target}_{cell_id}/{sample}"),
-        isec_file="{folder}/ISEC/{sample_target}_{cell_id}/{sample}/0001.vcf",
-        # t=touch("{folder}/ISECT/{sample_target}_{sample}.ok")
-    conda:
-        "envs/snp.yaml"
-    threads: 1
-    resources:
-        mem_mb=get_mem_mb,
-        time="10:00:00",
-    shell:
-        "bcftools isec -w2 -n~11 -p {output.isec} {input.vcf} {input.bcftools}"
+# rule analyse_isec:
+#     input:  
+#         # [
+#         #     expand("{folder}/ISEC/{sample_target}_{cell_id}/{sample}/0001.vcf", folder=folder, sample=sample_list, sample_target=sample_target, cell_id=sample_target_dict[sample_target])
+#         #     for sample_target in sample_target_dict
+#         # ]
+#         expand("{{folder}}/ISEC/{{sample_target}}_{{cell_id}}/{sample}/0001.vcf", sample=sample_list)
+#     output:
+#         detailed="{folder}/ANALYSIS/{sample_target}_{cell_id}_detailed.tsv",
+#         summary="{folder}/ANALYSIS/{sample_target}_{cell_id}_summary.tsv"
+#     conda:
+#         "mosaicatcher_env"
+#     threads: 64
+#     resources:
+#         mem_mb=get_mem_mb_heavy,
+#         time="10:00:00",
+#     script:
+#         "scripts/gather_isec.py"
 
-rule analyse_isec:
-    input:  
-        # [
-        #     expand("{folder}/ISEC/{sample_target}_{cell_id}/{sample}/0001.vcf", folder=folder, sample=sample_list, sample_target=sample_target, cell_id=sample_target_dict[sample_target])
-        #     for sample_target in sample_target_dict
-        # ]
-        expand("{{folder}}/ISEC/{{sample_target}}_{{cell_id}}/{sample}/0001.vcf", sample=sample_list)
-    output:
-        detailed="{folder}/ANALYSIS/{sample_target}_{cell_id}_detailed.tsv",
-        summary="{folder}/ANALYSIS/{sample_target}_{cell_id}_summary.tsv"
-    conda:
-        "mosaicatcher_env"
-    threads: 64
-    resources:
-        mem_mb=get_mem_mb_heavy,
-        time="10:00:00",
-    script:
-        "scripts/gather_isec.py"
+# rule analyse_isec:
+#     input:  
+#         vcf=[expand("{folder}/GENOTYPING_FILTER/{sample_target}_{cell_id}.vcf.gz", folder=folder, sample_target=sample_target, cell_id=sample_target_dict[sample_target]),
+#             for sample_target in sample_target_dict],
+#         # vcf_index=[expand("{folder}/GENOTYPING/{sample_target}_{cell_id}.vcf.gz.tbi", folder=folder, sample_target=sample_target, cell_id=sample_target_dict[sample_target]),
+#         #     for sample_target in sample_target_dict]
+
+#         ref="{folder}/BCFTOOLS_CLEAN/merge.vcf.gz"
+#     output:
+#         detailed="{folder}/ANALYSIS/{sample_target}_{cell_id}_detailed.tsv",
+#         summary="{folder}/ANALYSIS/{sample_target}_{cell_id}_summary.tsv"
+#     conda:
+#         "mosaicatcher_env"
+#     threads: 64
+#     resources:
+#         mem_mb=get_mem_mb_heavy,
+#         time="10:00:00",
+#     script:
+#         "scripts/gather_isec.py"
 
 
 rule samtools_coverage:
