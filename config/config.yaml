@@ -1,3 +1,46 @@
-chroms:
-  - chr1
-n: 0
+results_folder: /scratch/tweber/DATA/1000G_SNV_with_GT/OTF
+onekgp_vcf_folder: /scratch/tweber/DATA/1000G_SNV_with_GT/VCF
+bam_folder: /g/korbel2/weber/MosaiCatcher_files/POOLING/POOL1_RESEQ
+tmp_data_folder: /tmpdata/tweber
+fasta_ref: /g/korbel2/weber/MosaiCatcher_files/EXTERNAL_DATA/refgenomes_human_local/hg38.complete.fa
+samples_pooled:
+  - HG00097
+  - HG00179
+  - HG00438
+  - HG00735
+  - HG00766
+  - HG01106
+  - HG01273
+  - HG01611
+  - HG01881
+  - HG01916
+  - HG01978
+  - HG02523
+  - HG02615
+  - HG02662
+  - HG02812
+  - HG02945
+  - HG02972
+  - HG02978
+  - HG03098
+  - HG03480
+  - HG03771
+  - HG03804
+  - HG04115
+  - HG04157
+  - NA10864
+  - NA18530
+  - NA18537
+  - NA18941
+  - NA18965
+  - NA19145
+  - NA19202
+  - NA19436
+  - NA19474
+  - NA19705
+  - NA19721
+  - NA19730
+  - NA20128
+  - NA20510
+  - NA20862
+  - NA20869

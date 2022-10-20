@@ -1,4 +1,4 @@
-name: snp
+name: snp_genotyping
 channels:
   - bioconda
   - conda-forge
@@ -6,3 +6,5 @@ channels:
 dependencies:
   - bcftools=1.15.1=hfe4b78e_1
   - freebayes=1.3.6=hbfe0e7f_2
+  - vt
+  - samtools

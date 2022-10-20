@@ -19,7 +19,7 @@ import os, subprocess, sys
 
 # put = pool_samples
 # for j, e in tqdm(enumerate(list(snakemake.input))):
-l = [pd.read_csv(e, compression='gzip', sep="\t", names=["ID", "AC", "AF", "SAMPLE"]) for j, e in tqdm(enumerate(list(snakemake.input)))]
+l = [pd.read_csv(e, compression='gzip', sep="\t") for j, e in tqdm(enumerate(list(snakemake.input)))]
 pd.concat(l).to_csv(snakemake.output[0], sep="\t", compression="gzip", mode="w", index=False)
 
 # l = list()
