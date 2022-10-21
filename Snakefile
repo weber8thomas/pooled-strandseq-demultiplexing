@@ -9,7 +9,8 @@ results_folder = config["results_folder"]
 onekgp_vcf_folder = config["onekgp_vcf_folder"]
 bam_folder = config["bam_folder"]
 sample_list = config["samples_pooled"]
-
+sample_list = {k:[e.replace("GM", "NA") for e in v] for k,v in sample_list.items()}
+print(sample_list)
 # results_folder = "/scratch/tweber/DATA/1000G_SNV_with_GT/OTF"
 # onekgp_vcf_folder = "/scratch/tweber/DATA/1000G_SNV_with_GT/VCF"
 # bam_folder = "/g/korbel2/weber/MosaiCatcher_files/POOLING/POOL1_RESEQ/HGSVCxPool1/bam"
@@ -81,19 +82,23 @@ def get_mem_mb(wildcards, attempt):
 
 rule all:
     input:
-        [expand(
-            "{results_folder}/GENOTYPING_OTF/{sample}/{cell_id}.vcf.gz",
-            results_folder=results_folder,
-            sample=sample,
-            cell_id=cell_dict[sample],
-        ) for sample in samples],
+        # [expand(
+        #     "{results_folder}/GENOTYPING_OTF/{sample}/{cell_id}.vcf.gz",
+        #     results_folder=results_folder,
+        #     sample=sample,
+        #     cell_id=cell_dict[sample],
+        # ) for sample in samples],
+        # expand(
+        #     "{results_folder}/COVERAGE/{sample}/MERGE/merge_coverage.txt",
+        #     results_folder=results_folder,
+        #     sample=samples,
+        # ),
         expand(
-            "{results_folder}/COVERAGE/{sample}/MERGE/merge_coverage.txt",
+            "{results_folder}/ANALYSIS/{sample}.xlsx",
             results_folder=results_folder,
             sample=samples,
-        ),
-        
-        
+        )
+        # 
         # [
         #     expand(
         #         "{folder}/GENOTYPING_OTF/{sample_target}_{cell_id}.vcf.gz",
@@ -104,7 +109,7 @@ rule all:
         #     )
         #     for sample_target in sample_target_dict
         # ],
-        # expand("{results_folder}/BCFTOOLS_CONCAT_TAB/{sample}/merge.txt.gz", results_folder=results_folder),
+        # expand("{results_folder}/BCFTOOLS_CONCAT_TAB/{sample}/merge.txt.gz", results_folder=results_folder, sample=samples),
         # expand("{folder}/COVERAGE_POOL1/{cell_id}.txt", folder=folder, cell_id=cell_dict),
         # [
         #     expand("{folder}/COVERAGE_POOL1/{sample_target}_{cell_id}.txt", folder=folder, sample_target=sample_target, cell_id=sample_target_dict[sample_target])
@@ -128,9 +133,9 @@ rule all:
 
 rule create_single_1kgp_file_rare_het_intermediate:
     input:
-        expand("{onekgp_folder}/{file}", onekgp_folder=config["onekgp_vcf_folder"], file=onekgp_filelist)
+        expand("{onekgp_vcf_folder}/{file}", onekgp_vcf_folder=config["onekgp_vcf_folder"], file=onekgp_filelist)
     output:
-        "{onekgp_folder}/CUSTOM_VCF/1000G_rare005.vcf.gz"
+        "{onekgp_vcf_folder}/CUSTOM_VCF/1000G_rare005.vcf.gz"
     conda:
         "envs/snp_genotyping.yaml"
     threads: 10
@@ -149,9 +154,9 @@ rule create_single_1kgp_file_rare_het_intermediate:
 
 rule create_single_1kgp_file_rare_het_decompose:
     input:
-        "{onekgp_folder}/CUSTOM_VCF/1000G_rare005.vcf.gz"
+        "{onekgp_vcf_folder}/CUSTOM_VCF/1000G_rare005.vcf.gz"
     output:
-        "{onekgp_folder}/CUSTOM_VCF/1000G_rare005_decompose.vcf.gz"
+        "{onekgp_vcf_folder}/CUSTOM_VCF/1000G_rare005_decompose.vcf.gz"
     conda:
         "envs/snp_genotyping.yaml"
     threads: 1
@@ -169,8 +174,8 @@ rule create_single_1kgp_file_rare_het_decompose:
 
 rule retrieve_rare_variants_bcftools:
     input:
-        onekgp="{onekgp_folder}/CUSTOM_VCF/1000G_rare005_decompose.vcf.gz",
-        onekgp_index="{onekgp_folder}/CUSTOM_VCF/1000G_rare005_decompose.vcf.gz",
+        onekgp=ancient(expand("{onekgp_vcf_folder}/CUSTOM_VCF/1000G_rare005_decompose.vcf.gz", onekgp_vcf_folder=onekgp_vcf_folder)),
+        onekgp_index=ancient(expand("{onekgp_vcf_folder}/CUSTOM_VCF/1000G_rare005_decompose.vcf.gz", onekgp_vcf_folder=onekgp_vcf_folder)),
     output:
         "{results_folder}/BCFTOOLS_OTF/{onekgp_sample}.vcf.gz",
     conda:
@@ -216,10 +221,10 @@ rule concat_filter_bcftools:
 
 rule merge_concat_bcftools_tab:
     input:
-        expand(
+        lambda wc: expand(
             "{results_folder}/BCFTOOLS_CLEAN_OTF/SAMPLEWISE/{onekgp_sample}.txt.gz",
             results_folder=results_folder,
-            onekgp_sample=sample_list,
+            onekgp_sample=sample_list[wc.sample],
         ),
     output:
         "{results_folder}/BCFTOOLS_CONCAT_TAB/{sample}/merge.txt.gz",
@@ -236,11 +241,11 @@ rule merge_concat_bcftools_tab:
 
 rule merge_concat_bcftools_vcf:
     input:
-        vcf=expand(
-            "{results_folder}/BCFTOOLS_OTF/{onekgp_sample}.vcf.gz", results_folder=results_folder, onekgp_sample=sample_list
+        vcf=lambda wc: expand(
+            "{results_folder}/BCFTOOLS_OTF/{onekgp_sample}.vcf.gz", results_folder=results_folder, onekgp_sample=sample_list[wc.sample],
         ),
-        vcf_index=expand(
-            "{results_folder}/BCFTOOLS_OTF/{onekgp_sample}.vcf.gz.tbi", results_folder=results_folder, onekgp_sample=sample_list
+        vcf_index=lambda wc: expand(
+            "{results_folder}/BCFTOOLS_OTF/{onekgp_sample}.vcf.gz.tbi", results_folder=results_folder, onekgp_sample=sample_list[wc.sample],
         ),
     output:
         "{results_folder}/BCFTOOLS_CONCAT_VCF/{sample}/merge.vcf.gz",
@@ -339,28 +344,29 @@ rule regenotype_SNVs:
             # --include "QUAL>=10" \
 
 
-# rule analyse_isec:
-#     input:
-#         vcf=[
-#             expand(
-#                 "{folder}/GENOTYPING_OTF/{sample_target}_{cell_id}.vcf.gz",
-#                 folder=folder,
-#                 sample_target=sample_target,
-#                 cell_id=sample_target_dict[sample_target],
-#             )
-#             for sample_target in sample_target_dict
-#         ],
-#         ref="{folder}/BCFTOOLS_CONCAT_TAB/merge.txt.gz",
-#     output:
-#         detailed="{folder}/ANALYSIS/analysis_detailed.tsv",
-#         summary="{folder}/ANALYSIS/analysis_summary.tsv",
-#     conda:
-#         "mosaicatcher_env"
-#     threads: 64
-#     resources:
-#         mem_mb=get_mem_mb_heavy,
-#     script:
-#         "scripts/gather_isec.py"
+rule analyse_isec:
+    input:
+        vcf=lambda wc: expand(
+                "{results_folder}/GENOTYPING_OTF/{sample}/{cell_id}.vcf.gz",
+                results_folder=results_folder,
+                sample=wc.sample,
+                cell_id=cell_dict[wc.sample],
+            ),
+        ref="{results_folder}/BCFTOOLS_CONCAT_TAB/{sample}/merge.txt.gz",
+        coverage="{results_folder}/COVERAGE/{sample}/MERGE/merge_coverage.txt",
+        ashleys_predictions=lambda wc: expand("{bam_folder}/{sample}/cell_selection/labels.tsv", bam_folder=bam_folder, sample=wc.sample),
+        mc_predictions=lambda wc: expand("{bam_folder}/{sample}/counts/{sample}.info_raw", bam_folder=bam_folder, sample=wc.sample),
+    output:
+        stats="{results_folder}/ANALYSIS/{sample}.xlsx",
+    conda:
+        "mosaicatcher_env"
+    threads: 64
+    resources:
+        mem_mb=get_mem_mb_heavy,
+    # notebook:
+    #     "notebooks/gather_isec.py.ipynb"
+    script:
+        "scripts/gt_analysis.py"
 
 
 
@@ -372,8 +378,8 @@ rule index_vcf:
     resources:
         mem_mb=get_mem_mb,
         time="01:00:00",
-    envmodules:
-        "tabix/0.2.6-GCCcore-11.2.0",
+    conda:
+        "envs/snp_genotyping.yaml"
     shell:
         "tabix -p vcf {input}"
 
@@ -386,7 +392,7 @@ rule compress_vcf:
     resources:
         mem_mb=get_mem_mb,
         time="01:00:00",
-    envmodules:
-        "tabix/0.2.6-GCCcore-11.2.0",
+    conda:
+        "envs/snp_genotyping.yaml"
     shell:
         "bgzip {input}"
