@@ -33,10 +33,11 @@ dict_samples = {e: j for j, e in enumerate(samples)}
 # pool1 = ["NA10864", "NA18530", "NA18537", "NA18941", "NA18965", "NA19145", "NA19202", "NA19436", "NA19474", "NA19705", "NA19721", "NA19730", "NA20128", "NA20510", "NA20862", "NA20869", "HG00097", "HG00179", "HG00438", "HG00735", "HG00766", "HG01106", "HG01273", "HG01611", "HG01881", "HG01916", "HG01978", "HG02523", "HG02615", "HG02662", "HG02812", "HG02945", "HG02972", "HG02978", "HG03098", "HG03480", "HG03771", "HG03804", "HG04115", "HG04157",]
 # sample_list = pool_samples
 # sample_list = pool1
-
+# print(dict_samples)
 
 cell_dict = collections.defaultdict(list)
 for sample in os.listdir(bam_folder):
+    print(sample)
     if sample not in ["config", "log"]:
         for e in os.listdir(bam_folder + "/" + sample + "/bam"): 
             if e.endswith(".bam"):
@@ -82,7 +83,8 @@ def get_mem_mb(wildcards, attempt):
 
 rule all:
     input:
-        # [expand(
+        # [
+        #     expand(
         #     "{results_folder}/GENOTYPING_OTF/{sample}/{cell_id}.vcf.gz",
         #     results_folder=results_folder,
         #     sample=sample,
@@ -359,10 +361,13 @@ rule analyse_isec:
     output:
         stats="{results_folder}/ANALYSIS/{sample}.xlsx",
     conda:
-        "mosaicatcher_env"
-    threads: 64
+        # "mosaicatcher_env"
+        "envs/python_env.yaml"
+    threads: 128
     resources:
-        mem_mb=get_mem_mb_heavy,
+        # mem_mb=get_mem_mb_heavy,
+        mem_mb=256000,
+        time="24:00:00",
     # notebook:
     #     "notebooks/gather_isec.py.ipynb"
     script:
@@ -384,15 +389,15 @@ rule index_vcf:
         "tabix -p vcf {input}"
 
 
-rule compress_vcf:
-    input:
-        "{file}.vcf",
-    output:
-        "{file}.vcf.gz",
-    resources:
-        mem_mb=get_mem_mb,
-        time="01:00:00",
-    conda:
-        "envs/snp_genotyping.yaml"
-    shell:
-        "bgzip {input}"
+# rule compress_vcf:
+#     input:
+#         "{file}.vcf",
+#     output:
+#         "{file}.vcf.gz",
+#     resources:
+#         mem_mb=get_mem_mb,
+#         time="01:00:00",
+#     conda:
+#         "envs/snp_genotyping.yaml"
+#     shell:
+#         "bgzip {input}"

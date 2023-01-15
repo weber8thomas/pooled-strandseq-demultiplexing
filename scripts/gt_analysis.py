@@ -13,7 +13,10 @@ print(snakemake.input.mc_predictions)
 print(snakemake.input.coverage)
 
 ## List of inputs
-ref = pd.read_csv(snakemake.input.ref, compression="gzip", sep="\t", nrows=100000)
+# ref = pd.read_csv(snakemake.input.ref, compression="gzip", sep="\t", nrows=100000)
+ref = pd.read_csv(snakemake.input.ref, compression="gzip", sep="\t")
+# input_ref = "/scratch/tweber/DATA/1000G_SNV_with_GT/OTF/BCFTOOLS_CONCAT_TAB/HGSVCxPool2/merge.txt.gz"
+# ref = pd.read_csv(input_ref, compression="gzip", sep="\t", nrows=100000)
 
 m = mp.Manager()
 l_df_gb = m.list()
@@ -51,7 +54,7 @@ def mp_vcf(vcf, l_df_gb, l_df):
 
 
 f_ldir = sorted(list(snakemake.input.vcf))
-parmap.starmap(mp_vcf, list(zip(f_ldir)), l_df_gb, l_df)
+parmap.starmap(mp_vcf, list(zip(f_ldir)), l_df_gb, l_df, pm_processes=snakemake.threads)
 
 concat_df = pd.concat(list(l_df))
 
@@ -60,7 +63,14 @@ coverage_df = pd.read_csv(snakemake.input.coverage, sep="\t")
 
 ashleys_predictions = (
     pd.read_csv(list(snakemake.input.ashleys_predictions)[0], sep="\t")
-    .rename({"cell": "QUERY_SAMPLE_CELL", "prediction": "ashleys_prediction", "probability": "ashleys_probability"}, axis=1)
+    .rename(
+        {
+            "cell": "QUERY_SAMPLE_CELL",
+            "prediction": "ashleys_prediction",
+            "probability": "ashleys_probability",
+        },
+        axis=1,
+    )
     .sort_values(by="QUERY_SAMPLE_CELL")
 )
 ashleys_predictions["QUERY_SAMPLE_CELL"] = ashleys_predictions["QUERY_SAMPLE_CELL"].str.replace(".sort.mdup.bam", "")
@@ -68,12 +78,20 @@ ashleys_predictions["QUERY_SAMPLE_CELL"] = ashleys_predictions["QUERY_SAMPLE_CEL
 mc_predictions = (
     pd.read_csv(list(snakemake.input.mc_predictions)[0], skiprows=13, sep="\t")
     .rename({"cell": "QUERY_SAMPLE_CELL"}, axis=1)[["QUERY_SAMPLE_CELL", "mapped", "good", "pass1"]]
-    .rename({"mapped": "reads_mapped", "good": "reads_used", "pass1": "mc_coverage_compliant"}, axis=1)
+    .rename(
+        {
+            "mapped": "reads_mapped",
+            "good": "reads_used",
+            "pass1": "mc_coverage_compliant",
+        },
+        axis=1,
+    )
 )
 
 ashleys_mc_predictions = pd.merge(ashleys_predictions, mc_predictions, on="QUERY_SAMPLE_CELL")
 ashleys_mc_predictions.loc[
-    (ashleys_mc_predictions["ashleys_prediction"] == 1) & (ashleys_mc_predictions["mc_coverage_compliant"] == 1), "Used/Not used in MC"
+    (ashleys_mc_predictions["ashleys_prediction"] == 1) & (ashleys_mc_predictions["mc_coverage_compliant"] == 1),
+    "Used/Not used in MC",
 ] = 1
 ashleys_mc_predictions["Used/Not used in MC"] = ashleys_mc_predictions["Used/Not used in MC"].fillna(0)
 ashleys_mc_predictions["Used/Not used in MC"] = ashleys_mc_predictions["Used/Not used in MC"].astype(int)
@@ -142,6 +160,7 @@ empty_samples_list = [
     if "{}{}".format(common, str(e)) not in vcf_list
 ]
 
+
 merge_df = pd.concat([merge_df, pd.DataFrame(empty_samples_list)]).sort_values(by="QUERY_SAMPLE_CELL")
 
 concat_counts_df = concat_df.groupby("QUERY_SAMPLE_CELL")["SAMPLE"].value_counts().rename("Counts").reset_index()
@@ -161,7 +180,11 @@ merge_df = pd.merge(
 )
 merge_df = pd.merge(
     merge_df,
-    pd.pivot_table(concat_counts_df.loc[concat_counts_df["Rank"] <= 3], index="QUERY_SAMPLE_CELL", columns=["Rank"]),
+    pd.pivot_table(
+        concat_counts_df.loc[concat_counts_df["Rank"] <= 3],
+        index="QUERY_SAMPLE_CELL",
+        columns=["Rank"],
+    ),
     on="QUERY_SAMPLE_CELL",
     how="left",
 )
@@ -185,7 +208,11 @@ merge_df = pd.merge(
 )
 merge_df = pd.merge(
     merge_df,
-    pd.pivot_table(concat_counts_df.loc[concat_counts_df["Rank"] <= 3], index="QUERY_SAMPLE_CELL", columns=["Rank"]),
+    pd.pivot_table(
+        concat_counts_df.loc[concat_counts_df["Rank"] <= 3],
+        index="QUERY_SAMPLE_CELL",
+        columns=["Rank"],
+    ),
     on="QUERY_SAMPLE_CELL",
     how="left",
 )
@@ -193,33 +220,48 @@ merge_df = pd.merge(merge_df, coverage_df, on="QUERY_SAMPLE_CELL", how="left")
 merge_df = pd.merge(merge_df, ashleys_mc_predictions, on="QUERY_SAMPLE_CELL", how="left")
 
 pd.options.display.max_columns = 50
-merge_df.columns = [
-    "QUERY_SAMPLE_CELL",
-    "QUAL>=0",
-    "QUAL>={}".format(str(qual_cutoff)),
-    "QUAL>=0_SAMPLE_1",
-    "QUAL>=0_SAMPLE_2",
-    "QUAL>=0_SAMPLE_3",
-    "QUAL>=0_Counts_1",
-    "QUAL>=0_Counts_2",
-    "QUAL>=0_Counts_3",
-    "QUAL>={}_SAMPLE_1".format(str(qual_cutoff)),
-    "QUAL>={}_SAMPLE_2".format(str(qual_cutoff)),
-    "QUAL>={}_SAMPLE_3".format(str(qual_cutoff)),
-    "QUAL>={}_Counts_1".format(str(qual_cutoff)),
-    "QUAL>={}_Counts_2".format(str(qual_cutoff)),
-    "QUAL>={}_Counts_3".format(str(qual_cutoff)),
-    "meandepth",
-    "ashleys_prediction",
-    "ashleys_probability",
-    "reads_mapped",
-    "reads_used",
-    "mc_coverage_compliant",
-    "Used/Not used in MC",
-]
+# merge_df.columns = [
+#     "QUERY_SAMPLE_CELL",
+#     "QUAL>=0",
+#     "QUAL>={}".format(str(qual_cutoff)),
+#     "QUAL>=0_SAMPLE_1",
+#     "QUAL>=0_SAMPLE_2",
+#     "QUAL>=0_SAMPLE_3",
+#     "QUAL>=0_Counts_1",
+#     "QUAL>=0_Counts_2",
+#     "QUAL>=0_Counts_3",
+#     "QUAL>={}_SAMPLE_1".format(str(qual_cutoff)),
+#     "QUAL>={}_SAMPLE_2".format(str(qual_cutoff)),
+#     "QUAL>={}_SAMPLE_3".format(str(qual_cutoff)),
+#     "QUAL>={}_Counts_1".format(str(qual_cutoff)),
+#     "QUAL>={}_Counts_2".format(str(qual_cutoff)),
+#     "QUAL>={}_Counts_3".format(str(qual_cutoff)),
+#     "meandepth",
+#     "ashleys_prediction",
+#     "ashleys_probability",
+#     "reads_mapped",
+#     "reads_used",
+#     "mc_coverage_compliant",
+#     "Used/Not used in MC",
+# ]
 
 
 merge_df["meandepth"] = merge_df["meandepth"] * 100
+
+hgsvc_batch = merge_df["QUERY_SAMPLE_CELL"].values.tolist()[0].split("xpool")[1][0]
+ground_truth_path = "/g/korbel2/weber/MosaiCatcher_files/POOLING/POOLING_POOL{index}/HGSVCxpool{index}/all"
+
+david_df = pd.DataFrame(
+    [
+        {
+            "QUERY_SAMPLE_CELL": os.path.basename(f).split("_")[0],
+            "DAVID_Sample": os.path.basename(f).split("_sorted_")[1].replace(".sort.mdup.bam", ""),
+        }
+        for f in os.listdir(ground_truth_path.format(index=hgsvc_batch))
+        if f.endswith(".bam")
+    ]
+)
+merge_df = pd.merge(merge_df, david_df, on="QUERY_SAMPLE_CELL", how="left")
 
 merge_df.to_excel(snakemake.output.stats, index=False)
 print(merge_df)

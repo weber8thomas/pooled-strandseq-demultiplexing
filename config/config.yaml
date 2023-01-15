@@ -1,10 +1,12 @@
 results_folder: /scratch/tweber/DATA/1000G_SNV_with_GT/OTF
+# results_folder: /scratch/tweber/DATA/HGSVC_POOLS_GENOTYPING
 onekgp_vcf_folder: /scratch/tweber/DATA/1000G_SNV_with_GT/VCF
-bam_folder: /g/korbel2/weber/MosaiCatcher_files/POOLING/POOL1_RESEQ
+# bam_folder: /g/korbel2/weber/MosaiCatcher_files/POOLING/POOL1_RESEQ
+bam_folder: /scratch/tweber/DATA/MC_DATA/HGSVC/POOLS_BAM
 tmp_data_folder: /tmpdata/tweber
 fasta_ref: /g/korbel2/weber/MosaiCatcher_files/EXTERNAL_DATA/refgenomes_human_local/hg38.complete.fa
 samples_pooled:
-  HGSVCxPool1:
+  HGSVCxpool1x01:
     - HG00097
     - HG00179
     - HG00438
@@ -45,7 +47,7 @@ samples_pooled:
     - NA20510
     - NA20862
     - NA20869
-  HGSVCxPool2:
+  HGSVCxpool2x02:
     - GM19094
     - GM19173
     - HG02055
@@ -86,7 +88,7 @@ samples_pooled:
     - GM20845
     - HG03866
     - GM20507
-  HGSVCxPool3:
+  HGSVCxpool3x01:
     - GM19139
     - GM19100
     - HG01897
