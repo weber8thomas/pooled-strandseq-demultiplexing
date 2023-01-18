@@ -4,15 +4,29 @@ This repository aims to develop a pipeline to automatically reidentify cells seq
 
 ## Rationale
 
-1kgp is the single large-scale genomic project where genotype information is available at the sample level (GT FORMAT columns in the VCF file). Data is available [here](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/). 
+1kgp is the single large-scale genomic project where genotype information is available at the sample level (GT FORMAT columns in the VCF file). Data is available [here](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/).
 
 ## Aim
 
 As in the HGSVC large-scale inversion project, Strand-Seq libraries are pooled on a 96-well plate, it is not possible to know directly which sample is corresponding to a specific cell. Using the 1kgp genotype information will allow us to identify cells origin.
 
-## Code 
+## Code
 
 Pipeline was created using [snakemake](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/) and relies essentially on bcftools, freebayes, samtools and custom python scripts.
+
+## Command to run on HPC
+
+First, execute the following with `--dry-run` to be sure that the DAG is computed correctly:
+
+```bash
+snakemake --profile snakemake_profiles/HPC/dev/slurm_EMBL/ --dry-run
+```
+
+Then:
+
+```bash
+snakemake --profile snakemake_profiles/HPC/dev/slurm_EMBL/
+```
 
 ## Troubleshooting
 
