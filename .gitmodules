@@ -1,4 +1,7 @@
+[submodule "./snakemake_profiles"]
+path = ./snakemake_profiles
+url = https://github.com/weber8thomas/snakemake_profiles
+branch = main
 [submodule "snakemake_profiles"]
 	path = snakemake_profiles
 	url = https://github.com/weber8thomas/snakemake_profiles
-	branch = main
