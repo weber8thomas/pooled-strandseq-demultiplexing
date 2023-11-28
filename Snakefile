@@ -17,6 +17,7 @@ print(sample_list)
 
 # list 1kgp files
 onekgp_filelist = [e for e in os.listdir(onekgp_vcf_folder) if e.endswith(".vcf.gz")]
+print(onekgp_filelist)
 
 # Retrieve header
 header = subprocess.Popen(
@@ -34,7 +35,7 @@ dict_samples = {e: j for j, e in enumerate(samples)}
 # Retrieve list of cells for each Pool sample to be genotyped
 cell_dict = collections.defaultdict(list)
 for sample in os.listdir(bam_folder):
-    if sample not in ["config", "log"]:
+    if os.path.isdir(bam_folder + "/" + sample) and sample in sample_list.keys():
         for e in os.listdir(bam_folder + "/" + sample + "/bam"):
             if e.endswith(".bam"):
                 cell_dict[sample].append(e.replace(".sort.mdup.bam", ""))
@@ -129,7 +130,7 @@ rule retrieve_rare_variants_bcftools:
             )
         ),
     output:
-        "{results_folder}/BCFTOOLS_OTF/{onekgp_sample}.vcf.gz",
+        "{onekgp_vcf_folder}/BCFTOOLS_OTF/{onekgp_sample}.vcf.gz",
     conda:
         "envs/snp_genotyping.yaml"
     threads: 1
@@ -141,16 +142,17 @@ rule retrieve_rare_variants_bcftools:
         col_index=lambda wc: dict_samples[wc.onekgp_sample] + 1 + 9,  # +1 for python index +9 for the nine first cols
         af=0.05,
     shell:
-        "bcftools view --threads {threads} -i 'INFO/AC>0 & INFO/AF<{params.af} & GT[{params.index}]=\"het\"' --type snps {input.onekgp} | cut -f 1-9,{params.col_index} | bgzip > {output}"
+        "bcftools view --threads {threads} -i 'INFO/AC>0 & INFO/AF<{params.af}' --type snps {input.onekgp} | cut -f 1-9,{params.col_index} | bgzip > {output}"
+        # "bcftools view --threads {threads} -i 'INFO/AC>0 & INFO/AF<{params.af} & GT[{params.index}]=\"het\"' --type snps {input.onekgp} | cut -f 1-9,{params.col_index} | bgzip > {output}"
 
 
 rule concat_filter_bcftools:
     input:
-        "{results_folder}/BCFTOOLS_OTF/{onekgp_sample}.vcf.gz",
+        "{onekgp_vcf_folder}/BCFTOOLS_OTF/{onekgp_sample}.vcf.gz",
     output:
-        "{results_folder}/BCFTOOLS_CLEAN_OTF/SAMPLEWISE/{onekgp_sample}.txt.gz",
+        "{onekgp_vcf_folder}/BCFTOOLS_CLEAN_OTF/SAMPLEWISE/{onekgp_sample}.txt.gz",
     log:
-        "{results_folder}/log/BCFTOOLS_CLEAN/{onekgp_sample}.log",
+        "{onekgp_vcf_folder}/log/BCFTOOLS_CLEAN/{onekgp_sample}.log",
     threads: 1
     resources:
         mem_mb=2000,
@@ -190,14 +192,14 @@ rule concat_filter_bcftools:
 rule merge_concat_bcftools_tab:
     input:
         lambda wc: expand(
-            "{results_folder}/BCFTOOLS_CLEAN_OTF/SAMPLEWISE/{onekgp_sample}.txt.gz",
-            results_folder=results_folder,
+            "{onekgp_vcf_folder}/BCFTOOLS_CLEAN_OTF/SAMPLEWISE/{onekgp_sample}.txt.gz",
+            onekgp_vcf_folder=onekgp_vcf_folder,
             onekgp_sample=sample_list[wc.sample],
         ),
     output:
-        "{results_folder}/BCFTOOLS_CONCAT_TAB/{sample}/merge.txt.gz",
+        "{onekgp_vcf_folder}/BCFTOOLS_CONCAT_TAB/{sample}/merge.txt.gz",
     log:
-        "{results_folder}/log/BCFTOOLS_CLEAN/{sample}/merge.log",
+        "{onekgp_vcf_folder}/log/BCFTOOLS_CLEAN/{sample}/merge.log",
     conda:
         "envs/python_env.yaml"
     threads: 1
@@ -210,13 +212,13 @@ rule merge_concat_bcftools_tab:
 rule merge_concat_bcftools_vcf:
     input:
         vcf=lambda wc: expand(
-            "{results_folder}/BCFTOOLS_OTF/{onekgp_sample}.vcf.gz",
-            results_folder=results_folder,
+            "{onekgp_vcf_folder}/BCFTOOLS_OTF/{onekgp_sample}.vcf.gz",
+            onekgp_vcf_folder=onekgp_vcf_folder,
             onekgp_sample=sample_list[wc.sample],
         ),
         vcf_index=lambda wc: expand(
-            "{results_folder}/BCFTOOLS_OTF/{onekgp_sample}.vcf.gz.tbi",
-            results_folder=results_folder,
+            "{onekgp_vcf_folder}/BCFTOOLS_OTF/{onekgp_sample}.vcf.gz.tbi",
+            onekgp_vcf_folder=onekgp_vcf_folder,
             onekgp_sample=sample_list[wc.sample],
         ),
     output:
@@ -309,6 +311,7 @@ rule regenotype_SNVs:
     log:
         vcf="{results_folder}/log/GENOTYPING/{sample}/{cell_id}.log",
     resources:
+        # partition="bigmem",
         mem_mb=get_mem_mb_heavy,
         time="20:00:00",
     threads: 32
@@ -316,20 +319,32 @@ rule regenotype_SNVs:
         "envs/snp_genotyping.yaml"
     shell:
         """
-        /g/korbel2/weber/Gits/freebayes/scripts/freebayes-parallel \
-            <(/g/korbel2/weber/Gits/freebayes/scripts/fasta_generate_regions.py {input.fasta} 100000) {threads} \
+        freebayes \
             -f {input.fasta} \
-            -@ {input.sites} \
-            --only-use-input-alleles {input.bam} \
+            {input.bam} \
             --genotype-qualities \
             --exclude-unobserved-genotypes \
         | bcftools view \
             --threads {threads} \
             --exclude-uncalled \
             --types snps \
-            --genotype het \
             -Oz -o {output.vcf} 2> {log}
         """
+        # """
+        # /g/korbel2/weber/Gits/freebayes/scripts/freebayes-parallel \
+        #     <(/g/korbel2/weber/Gits/freebayes/scripts/fasta_generate_regions.py {input.fasta} 100000) {threads} \
+        #     -f {input.fasta} \
+        #     -@ {input.sites} \
+        #     --only-use-input-alleles {input.bam} \
+        #     --genotype-qualities \
+        #     --exclude-unobserved-genotypes \
+        # | bcftools view \
+        #     --threads {threads} \
+        #     --exclude-uncalled \
+        #     --types snps \
+        #     --genotype het \
+        #     -Oz -o {output.vcf} 2> {log}
+        # """
 
 
 rule analyse_isec:
@@ -358,6 +373,7 @@ rule analyse_isec:
         "envs/python_env.yaml"
     threads: 128
     resources:
+        partition="bigmem",
         mem_mb=256000,
         time="24:00:00",
     script:
