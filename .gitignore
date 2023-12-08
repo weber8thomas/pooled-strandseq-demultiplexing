@@ -138,3 +138,4 @@ logs/
 .DS_Store
 ._.DS_Store
 
+*.vcf.*

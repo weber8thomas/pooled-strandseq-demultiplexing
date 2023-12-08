@@ -1,137 +1,55 @@
 # results_folder: /scratch/tweber/DATA/1000G_SNV_with_GT/OTF
 # results_folder: /scratch/tsapalou_template/DATA/GENOTYPING/1000G_SNV_with_GT/RESULTS
-results_folder: /scratch/tweber/DATA/MC_DATA/DEMULTIPLEXING_POOLS
 # results_folder: /scratch/tweber/DATA/1000G_SNV_with_GT/RESULTS
-onekgp_vcf_folder: /g/korbel/weber/MosaiCatcher_files/EXTERNAL_DATA/snv_sites_to_genotype/1000G_SNV_with_GT
 # onekgp_vcf_folder: /scratch/tweber/DATA/1000G_SNV_with_GT/VCF
 # onekgp_vcf_folder: /scratch/tsapalou_template/DATA/GENOTYPING/1000G_SNV_with_GT/VCF
 # bam_folder: /g/korbel2/weber/MosaiCatcher_files/POOLING/POOL1_RESEQ
-bam_folder: /scratch/tweber/DATA/MC_DATA/STOCKS/2023-11-09-HW3YVAFX5
 # bam_folder: /scratch/tweber/DATA/MC_DATA/HGSVC/POOLS_BAM
-tmp_data_folder: /tmpdata/tweber
+bam_folder: /scratch/tweber/DATA/MC_DATA/STOCKS/2023-11-09-HW3YVAFX5
+onekgp_vcf_folder: /scratch/tweber/DATA/MC_DATA/DEMULTIPLEXING_POOLS/1000G_SNV_with_GT/HGSVC2_1KG_3202_VCF_FILES_RENAMED_SYMLINK
+# onekgp_vcf_folder: /g/korbel/weber/MosaiCatcher_files/EXTERNAL_DATA/snv_sites_to_genotype/1000G_SNV_with_GT/HGSVC2_1KG_3202_VCF_FILES_RENAMED_SYMLINK
+results_folder: /scratch/tweber/DATA/MC_DATA/DEMULTIPLEXING_POOLS
+tmp_data_folder: /tmpdata/tweber/bcftools/
 fasta_ref: /g/korbel2/weber/MosaiCatcher_files/EXTERNAL_DATA/refgenomes_human_local/hg38.complete.fa
 samples_pooled:
-  # HGSVCxpool1x01:
-  #   - HG00097
-  #   - HG00179
-  #   - HG00438
-  #   - HG00735
-  #   - HG00766
-  #   - HG01106
-  #   - HG01273
-  #   - HG01611
-  #   - HG01881
-  #   - HG01916
-  #   - HG01978
-  #   - HG02523
-  #   - HG02615
-  #   - HG02662
-  #   - HG02812
-  #   - HG02945
-  #   - HG02972
-  #   - HG02978
-  #   - HG03098
-  #   - HG03480
-  #   - HG03771
-  #   - HG03804
-  #   - HG04115
-  #   - HG04157
-  #   - NA10864
-  #   - NA18530
-  #   - NA18537
-  #   - NA18941
-  #   - NA18965
-  #   - NA19145
-  #   - NA19202
-  #   - NA19436
-  #   - NA19474
-  #   - NA19705
-  #   - NA19721
-  #   - NA19730
-  #   - NA20128
-  #   - NA20510
-  #   - NA20862
-  #   - NA20869
-  # HGSVCxpool2x02:
   LanexHGSVCpool2NEW:
-    - GM19094
-    - GM19173
-    - HG02055
-    - HG01884
-    - GM20129
-    - GM19902
-    - HG03816
-    - GM10837
-    - HG00423
-    - HG00480
-    - HG01276
-    - HG03519
-    - HG02975
-    - HG02723
-    - HG02625
-    - HG01616
-    - HG01609
-    - HG02132
-    - HG02068
-    - HG03056
-    - HG03576
-    - GM19724
-    - HG01928
-    - HG02148
-    - HG02698
-    - HG01243
-    - HG04204
-    - HG04199
-    - GM18951
-    - GM19334
-    - GM19440
-    - HG00844
-    - HG01031
-    - GM18531
-    - HG00267
-    - HG00186
-    - HG00155
-    - GM20845
-    - HG03866
-    - GM20507
-  # HGSVCxpool3x01:
-  #   - GM19139
-  #   - GM19100
-  #   - HG01897
-  #   - HG01887
-  #   - GM19702
-  #   - GM20358
-  #   - HG03942
-  #   - GM10857
-  #   - GM10831
-  #   - HG00673
-  #   - HG01255
-  #   - HG01493
-  #   - HG03522
-  #   - HG03200
-  #   - HG03035
-  #   - HG02809
-  #   - HG01614
-  #   - HG03719
-  #   - HG02135
-  #   - HG03456
-  #   - HG03584
-  #   - GM19727
-  #   - HG01952
-  #   - HG02602
-  #   - HG03654
-  #   - HG01071
-  #   - HG03688
-  #   - GM18562
-  #   - GM19385
-  #   - GM19384
-  #   - HG00851
-  #   - HG00269
-  #   - HG00233
-  #   - HG00246
-  #   - GM20846
-  #   - HG03968
-  #   - GM18940
-  #   - GM19443
-  #   - GM20508
-  #   - GM20536
+    - HG00238
+    - HG00342
+    - HG00479
+    - HG00623
+    - HG00702
+    - HG00705
+    - HG00739
+    - HG01800
+    - HG02014
+    - HG02155
+    - HG02178
+    - HG02190
+    - HG02312
+    - HG02485
+    - HG02643
+    - HG02679
+    - HG02793
+    - HG02944
+    - HG03121
+    - HG03133
+    - HG03369
+    - HG03371
+    - HG03548
+    - HG03673
+    - HG03812
+    - HG03882
+    - HG03897
+    - NA10861
+    # - NA18540
+    - NA18566
+    - NA18879
+    - NA18907
+    - NA18913
+    - NA18941
+    - NA19451
+    - NA19455
+    - NA19788
+    - NA20525
+    - NA20861
+    - NA21126
