@@ -16,12 +16,21 @@ sample_list = {k: [e.replace("GM", "NA") for e in v] for k, v in sample_list.ite
 print(sample_list)
 
 # list 1kgp files
-onekgp_filelist = [e for e in os.listdir(onekgp_vcf_folder) if e.endswith(".vcf.gz")]
+onekgp_filelist = [
+    e
+    for e in os.listdir(
+        onekgp_vcf_folder + "/HGSVC2_1KG_3202_VCF_FILES_RENAMED_SYMLINK"
+    )
+    if e.endswith(".vcf.gz")
+]
+print(onekgp_vcf_folder + "/HGSVC2_1KG_3202_VCF_FILES_RENAMED_SYMLINK")
+print(onekgp_filelist)
 
 # Retrieve header
 header = subprocess.Popen(
-    "zcat {folder}/{file} | head -n 5000 | grep -P  '^#CHROM'".format(
-        folder=onekgp_vcf_folder, file=onekgp_filelist[0]
+    "zcat {folder}/{file} | head -n 100 | grep -P  '^#CHROM'".format(
+        folder=onekgp_vcf_folder + "/HGSVC2_1KG_3202_VCF_FILES_RENAMED_SYMLINK",
+        file=onekgp_filelist[0],
     ),
     shell=True,
     stdout=subprocess.PIPE,
@@ -30,24 +39,55 @@ header = subprocess.Popen(
 # List of 1kgp samples & dict with index nb
 samples = header.communicate()[0].decode("utf-8").strip().split("\t")[9:]
 dict_samples = {e: j for j, e in enumerate(samples)}
+all_samples_to_genotype = [sub_e for k, v in sample_list.items() for sub_e in v]
+print(samples)
+print(all_samples_to_genotype)
+
+
+import random
+
+random.seed(43)
+
 
 # Retrieve list of cells for each Pool sample to be genotyped
 cell_dict = collections.defaultdict(list)
-for sample in os.listdir(bam_folder):
+for sample in sorted(os.listdir(bam_folder)):
     if sample not in ["config", "log"]:
-        for e in os.listdir(bam_folder + "/" + sample + "/bam"):
+        l_dir = [
+            k
+            for k in os.listdir(bam_folder + "/" + sample + "/bam")
+            if k.endswith(".sort.mdup.bam")
+        ]
+        random.shuffle(l_dir)
+        for j, e in enumerate(l_dir):
+            # if j < 100:
             if e.endswith(".bam"):
                 cell_dict[sample].append(e.replace(".sort.mdup.bam", ""))
 
+
+# random.seed(42)
+random_selection = random.sample(
+    [x for x in samples if x not in all_samples_to_genotype], 10
+)
+# random_selection = random.sample([x for x in samples if x not in all_samples_to_genotype], 10)
+
+
 # List of pool samples to process
 samples = list(cell_dict.keys())
+
+
+# sample_list["GM19317x02"] = ["NA19317"] + random_selection
+sample_list["Random_for_sanity_check"] = random_selection
+
+
+print(sample_list)
 
 
 def get_mem_mb_heavy(wildcards, attempt):
     """
     To adjust resources in the rules
     """
-    mem_avail = [64, 128, 256]
+    mem_avail = [32, 64, 96, 128, 192, 256]
     return mem_avail[attempt - 1] * 1000
 
 
@@ -61,11 +101,40 @@ def get_mem_mb(wildcards, attempt):
 
 rule all:
     input:
-        expand(
-            "{results_folder}/ANALYSIS/{sample}.xlsx",
-            results_folder=results_folder,
-            sample=samples,
-        ),
+        # expand(
+        #     "{results_folder}/ANALYSIS/{sample}.xlsx",
+        #     results_folder=results_folder,
+        #     sample=samples,
+        # ),
+        [
+            expand(
+                "{results_folder}/SNP_DISCOVERY/{sample}/{cell_id}.vcf",
+                # "{results_folder}/GENOTYPING_OTF/{sample}/{cell_id}.vcf.gz",
+                results_folder=results_folder,
+                sample=sample,
+                cell_id=cell_dict[sample],
+            )
+            for sample in samples
+        ],
+        [expand("{results_folder}/BCFTOOLS_CONCAT_TAB/{sample}/merge.txt.gz", results_folder=results_folder, sample=list(sample_list.keys())) for sample in samples],
+        [
+            expand(
+                "{results_folder}/COVERAGE/{sample}/MERGE/merge_coverage.txt",
+                results_folder=results_folder,
+                sample=sample,
+            )
+            for sample in samples
+        ],
+        # [expand(
+        #     "{bam_folder}/{sample}/cell_selection/labels.tsv",
+        #     bam_folder=bam_folder,
+        #     sample=sample,
+        # ) for sample in samples],
+        # [expand(
+        #     "{bam_folder}/{sample}/counts/{sample}.info_raw",
+        #     bam_folder=bam_folder,
+        #     sample=sample,
+        # ) for sample in samples],
 
 
 rule create_single_1kgp_file_rare_het_intermediate:
@@ -199,6 +268,7 @@ rule merge_concat_bcftools_tab:
     log:
         "{results_folder}/log/BCFTOOLS_CLEAN/{sample}/merge.log",
     conda:
+        # "/g/korbel2/weber/miniconda3"
         "envs/python_env.yaml"
     threads: 1
     resources:
@@ -220,16 +290,16 @@ rule merge_concat_bcftools_vcf:
             onekgp_sample=sample_list[wc.sample],
         ),
     output:
-        "{results_folder}/BCFTOOLS_CONCAT_VCF/{sample}/merge.vcf.gz",
+        "{results_folder}/BCFTOOLS_CONCAT_VCF/{sample}/merge.vcf",
     log:
         "{results_folder}/log/BCFTOOLS_CONCAT/{sample}/merge.log",
     conda:
         "envs/snp_genotyping.yaml"
     threads: 1
     resources:
-        mem_mb=16000,
+        mem_mb=get_mem_mb_heavy,
     shell:
-        "bcftools merge {input.vcf} | bcftools sort | bcftools norm -d none | cut -f -8 | bgzip > {output} 2> {log}"
+        "bcftools merge {input.vcf} | bcftools sort --temp-dir /tmpdata/tweber/ | bcftools norm -d none | bcftools view -h -H > {output}"
 
 
 rule samtools_coverage:
@@ -303,65 +373,70 @@ rule regenotype_SNVs:
         sites_index="{results_folder}/BCFTOOLS_CONCAT_VCF/{sample}/merge.vcf.gz.tbi",
         fasta=config["fasta_ref"],
         fasta_index="{fasta_ref}.fai".format(fasta_ref=config["fasta_ref"]),
-        merge_table="{results_folder}/BCFTOOLS_CONCAT_TAB/{sample}/merge.txt.gz",
+        # merge_table="{results_folder}/BCFTOOLS_CONCAT_TAB/{sample}/merge.txt.gz",
     output:
-        vcf="{results_folder}/GENOTYPING_OTF/{sample}/{cell_id}.vcf.gz",
+        vcf="{results_folder}/SNP_DISCOVERY/{sample}/{cell_id}.vcf",
     log:
-        vcf="{results_folder}/log/GENOTYPING/{sample}/{cell_id}.log",
+        vcf="{results_folder}/log/SNP_DISCOVERY/{sample}/{cell_id}.log",
     resources:
         mem_mb=get_mem_mb_heavy,
         time="20:00:00",
-    threads: 32
+    threads: 1
     conda:
         "envs/snp_genotyping.yaml"
+    # envmodules:
+    #     "freebayes/1.3.6-foss-2021b-R-4.1.2",
+    #     "BCFtools/1.16-GCC-11.3.0",
     shell:
         """
-        /g/korbel2/weber/Gits/freebayes/scripts/freebayes-parallel \
-            <(/g/korbel2/weber/Gits/freebayes/scripts/fasta_generate_regions.py {input.fasta} 100000) {threads} \
-            -f {input.fasta} \
-            -@ {input.sites} \
-            --only-use-input-alleles {input.bam} \
-            --genotype-qualities \
-            --exclude-unobserved-genotypes \
-        | bcftools view \
-            --threads {threads} \
-            --exclude-uncalled \
-            --types snps \
-            --genotype het \
-            -Oz -o {output.vcf} 2> {log}
+        freebayes -f {input.fasta} --exclude-unobserved-genotype {input.bam} > {output.vcf}
         """
+        # """
+        # freebayes \
+        #     -f {input.fasta} \
+        #     -@ {input.sites} \
+        #     --only-use-input-alleles \
+        #     --genotype-qualities \
+        #     --exclude-unobserved-genotypes \
+        #     {input.bam} \
+        # | bcftools view \
+        #     --exclude-uncalled \
+        #     --types snps \
+        #     --genotype het \
+        #     -Oz -o {output.vcf} 2> {log}
+        # """
 
 
-rule analyse_isec:
-    input:
-        vcf=lambda wc: expand(
-            "{results_folder}/GENOTYPING_OTF/{sample}/{cell_id}.vcf.gz",
-            results_folder=results_folder,
-            sample=wc.sample,
-            cell_id=cell_dict[wc.sample],
-        ),
-        ref="{results_folder}/BCFTOOLS_CONCAT_TAB/{sample}/merge.txt.gz",
-        coverage="{results_folder}/COVERAGE/{sample}/MERGE/merge_coverage.txt",
-        ashleys_predictions=lambda wc: expand(
-            "{bam_folder}/{sample}/cell_selection/labels.tsv",
-            bam_folder=bam_folder,
-            sample=wc.sample,
-        ),
-        mc_predictions=lambda wc: expand(
-            "{bam_folder}/{sample}/counts/{sample}.info_raw",
-            bam_folder=bam_folder,
-            sample=wc.sample,
-        ),
-    output:
-        stats="{results_folder}/ANALYSIS/{sample}.xlsx",
-    conda:
-        "envs/python_env.yaml"
-    threads: 128
-    resources:
-        mem_mb=256000,
-        time="24:00:00",
-    script:
-        "scripts/gt_analysis.py"
+# rule analyse_isec:
+#     input:
+#         vcf=lambda wc: expand(
+#             "{results_folder}/GENOTYPING_OTF/{sample}/{cell_id}.vcf.gz",
+#             results_folder=results_folder,
+#             sample=wc.sample,
+#             cell_id=cell_dict[wc.sample],
+#         ),
+#         ref="{results_folder}/BCFTOOLS_CONCAT_TAB/{sample}/merge.txt.gz",
+#         coverage="{results_folder}/COVERAGE/{sample}/MERGE/merge_coverage.txt",
+#         ashleys_predictions=lambda wc: expand(
+#             "{bam_folder}/{sample}/cell_selection/labels.tsv",
+#             bam_folder=bam_folder,
+#             sample=wc.sample,
+#         ),
+#         mc_predictions=lambda wc: expand(
+#             "{bam_folder}/{sample}/counts/{sample}.info_raw",
+#             bam_folder=bam_folder,
+#             sample=wc.sample,
+#         ),
+#     output:
+#         stats="{results_folder}/ANALYSIS/{sample}.xlsx",
+#     conda:
+#         "envs/python_env.yaml"
+#     threads: 128
+#     resources:
+#         mem_mb=256000,
+#         time="24:00:00",
+#     script:
+#         "scripts/gt_analysis.py"
 
 
 rule index_vcf:
