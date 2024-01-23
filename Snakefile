@@ -255,6 +255,8 @@ rule concat_filter_bcftools:
         # 'bcftools view --type snps {input} | cut -f 3,8 | sed "s/$/\\t{wildcards.sample}/g;s/AC=//g;s/AF=//g" |  grep -v "^#" | tail -n+2 | tr ";" "\\t" | bgzip > {output}'
 
 
+localrules: merge_concat_bcftools_tab, merge_concat_bcftools_vcf
+
 
 rule merge_concat_bcftools_tab:
     input:
@@ -369,8 +371,8 @@ rule regenotype_SNVs:
             bam_folder=bam_folder,
             sample=wc.sample,
         ),
-        sites="{results_folder}/BCFTOOLS_CONCAT_VCF/{sample}/merge.vcf.gz",
-        sites_index="{results_folder}/BCFTOOLS_CONCAT_VCF/{sample}/merge.vcf.gz.tbi",
+        # sites="{results_folder}/BCFTOOLS_CONCAT_VCF/{sample}/merge.vcf.gz",
+        # sites_index="{results_folder}/BCFTOOLS_CONCAT_VCF/{sample}/merge.vcf.gz.tbi",
         fasta=config["fasta_ref"],
         fasta_index="{fasta_ref}.fai".format(fasta_ref=config["fasta_ref"]),
         # merge_table="{results_folder}/BCFTOOLS_CONCAT_TAB/{sample}/merge.txt.gz",

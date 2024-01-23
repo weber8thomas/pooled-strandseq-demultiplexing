@@ -139,3 +139,5 @@ logs/
 ._.DS_Store
 
 test.vcf
+*.txt
+*.png

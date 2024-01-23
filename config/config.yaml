@@ -5,24 +5,66 @@ results_folder: /scratch/tweber/DATA/MC_DATA/DEMULTIPLEXING_POOLS
 # onekgp_vcf_folder: /scratch/tsapalou/DATA/GENOTYPING/1000G_SNV_with_GT/VCF
 onekgp_vcf_folder: /scratch/tweber/DATA/MC_DATA/DEMULTIPLEXING_POOLS/1000G_SNV_with_GT
 # bam_folder: /g/korbel2/weber/MosaiCatcher_files/POOLING/POOL1_RESEQ
-bam_folder: /scratch/tweber/DATA/MC_DATA/DEMULTIPLEXING_POOLS/BENCHMARK_PSEUDOPOOL
-# bam_folder: /scratch/tweber/DATA/MC_DATA/STOCKS/2023-11-09-HW3YVAFX5
+# bam_folder: /scratch/tweber/DATA/MC_DATA/DEMULTIPLEXING_POOLS/OLD_POOLS
+bam_folder: /scratch/tweber/DATA/MC_DATA/STOCKS/2023-11-09-HW5NFAFX5
 tmp_data_folder: /tmpdata/tweber/
 fasta_ref: /g/korbel2/weber/workspace/mosaicatcher-update/workflow/data/ref_genomes/hg38.fa
 samples_pooled:
-  PSEUDOPOOL:
-  - NA18989
-  - NA19320
-  - NA19331
-  - NA19836
-  - NA20355
-  # - NA21487
-  - HG02282
-  - HG02554
-  - HG02666
-  - HG02769
-  - HG02953
-  - HG03452
+  HGSVCpool1NEW:
+    - HG00120
+    - HG00138
+    - HG00149
+    - HG00324
+    - HG00361
+    - HG00443
+    - HG00565
+    - HG00736
+    - HG01108
+    - HG01455
+    - HG01479
+    - HG01506
+    - HG01550
+    - HG01756
+    - HG01879
+    - HG01971
+    - HG01982
+    - HG02060
+    - HG02087
+    - HG02364
+    - HG02546
+    - HG02580
+    - HG03009
+    - HG03052
+    - HG03073
+    - HG03265
+    - HG03461
+    - HG03792
+    - HG04062
+    - GM10851
+    - GM12802
+    - GM12890
+    # - GM15208
+    - GM18555
+    - GM18577
+    # - GM19453
+    - GM19909
+    - GM20294
+    - GM21099
+    - GM21101
+
+  # PSEUDOPOOL:
+  # - NA18989
+  # - NA19320
+  # - NA19331
+  # - NA19836
+  # - NA20355
+  # # - NA21487
+  # - HG02282
+  # - HG02554
+  # - HG02666
+  # - HG02769
+  # - HG02953
+  # - HG03452
   # GM19317x02:
   #   - NA19317
   # LanexHGSVCpool2NEW:
