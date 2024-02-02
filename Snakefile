@@ -52,7 +52,7 @@ random.seed(43)
 # Retrieve list of cells for each Pool sample to be genotyped
 cell_dict = collections.defaultdict(list)
 for sample in sorted(os.listdir(bam_folder)):
-    if sample not in ["config", "log"]:
+    if sample not in ["config", "log"] and sample in sample_list.keys():
         l_dir = [
             k
             for k in os.listdir(bam_folder + "/" + sample + "/bam")
@@ -81,7 +81,7 @@ sample_list["Random_for_sanity_check"] = random_selection
 
 
 print(sample_list)
-
+# exit()
 
 def get_mem_mb_heavy(wildcards, attempt):
     """
