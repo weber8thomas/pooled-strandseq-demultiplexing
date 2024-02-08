@@ -10,9 +10,29 @@ configfile: "config/config.yaml"
 results_folder = config["results_folder"]
 onekgp_vcf_folder = config["onekgp_vcf_folder"]
 bam_folder = config["bam_folder"]
+
+# list samples in bam folder
+samples = [
+    e
+    for e in os.listdir(bam_folder)
+    if os.path.isdir(bam_folder + "/" + e) and e not in ["config", "log"] and "pool" in e
+
+]
+
+
+
+print(samples)
+
 sample_list = config["samples_pooled"]
 # Rename 1KG samples from GM to NA
 sample_list = {k: [e.replace("GM", "NA") for e in v] for k, v in sample_list.items()}
+print(sample_list)
+new_check = True if "NEW" in samples[0] else False
+if new_check:
+    sample_list = {k:v for k,v in sample_list.items() if "NEW" in k}
+else:
+    sample_list = {k:v for k,v in sample_list.items() if "NEW" not in k}
+sample_list = {s:v for k,v in sample_list.items() for s in samples if k in s}
 print(sample_list)
 
 # list 1kgp files
@@ -24,7 +44,7 @@ onekgp_filelist = [
     if e.endswith(".vcf.gz")
 ]
 print(onekgp_vcf_folder + "/HGSVC2_1KG_3202_VCF_FILES_RENAMED_SYMLINK")
-print(onekgp_filelist)
+# print(onekgp_filelist)
 
 # Retrieve header
 header = subprocess.Popen(
@@ -40,8 +60,8 @@ header = subprocess.Popen(
 samples = header.communicate()[0].decode("utf-8").strip().split("\t")[9:]
 dict_samples = {e: j for j, e in enumerate(samples)}
 all_samples_to_genotype = [sub_e for k, v in sample_list.items() for sub_e in v]
-print(samples)
-print(all_samples_to_genotype)
+# print(samples)
+# print(all_samples_to_genotype)
 
 
 import random
@@ -77,7 +97,7 @@ samples = list(cell_dict.keys())
 
 
 # sample_list["GM19317x02"] = ["NA19317"] + random_selection
-sample_list["Random_for_sanity_check"] = random_selection
+# sample_list["Random_for_sanity_check"] = random_selection
 
 
 print(sample_list)
@@ -116,6 +136,7 @@ rule all:
             )
             for sample in samples
         ],
+        # TODO: CHANGE THIS TO A POOL OUTPUT THAT CAN BE REUSED FOR ALL CORRESPONDING PLATES
         [expand("{results_folder}/BCFTOOLS_CONCAT_TAB/{sample}/merge.txt.gz", results_folder=results_folder, sample=list(sample_list.keys())) for sample in samples],
         [
             expand(
@@ -318,8 +339,10 @@ rule samtools_coverage:
         ),
     output:
         coverage="{results_folder}/COVERAGE/{sample}/{cell_id}.txt",
-    conda:
-        "envs/snp_genotyping.yaml"
+    # conda:
+    #     "envs/snp_genotyping.yaml"
+    envmodules:
+        "SAMtools/1.14-GCC-11.2.0",
     resources:
         mem_mb=2000,
         time="01:00:00",
