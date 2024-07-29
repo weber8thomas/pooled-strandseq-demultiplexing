@@ -141,3 +141,4 @@ logs/
 test.vcf
 *.txt
 *.png
+notebooks/hgsvc_korbel_samples.xlsx

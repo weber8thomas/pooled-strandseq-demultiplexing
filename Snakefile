@@ -15,10 +15,9 @@ bam_folder = config["bam_folder"]
 samples = [
     e
     for e in os.listdir(bam_folder)
-    if os.path.isdir(bam_folder + "/" + e) and e not in ["config", "log"] and "pool" in e
+    if os.path.isdir(bam_folder + "/" + e) and e not in ["config", "log"] and "pool" in e.lower()
 
 ]
-
 
 
 print(samples)
@@ -28,11 +27,13 @@ sample_list = config["samples_pooled"]
 sample_list = {k: [e.replace("GM", "NA") for e in v] for k, v in sample_list.items()}
 print(sample_list)
 new_check = True if "NEW" in samples[0] else False
+print(new_check)
 if new_check:
     sample_list = {k:v for k,v in sample_list.items() if "NEW" in k}
 else:
     sample_list = {k:v for k,v in sample_list.items() if "NEW" not in k}
-sample_list = {s:v for k,v in sample_list.items() for s in samples if k in s}
+print(sample_list)
+sample_list = {s:v for k,v in sample_list.items() for s in samples if k in s.lower()}
 print(sample_list)
 
 # list 1kgp files
@@ -72,18 +73,25 @@ random.seed(43)
 # Retrieve list of cells for each Pool sample to be genotyped
 cell_dict = collections.defaultdict(list)
 for sample in sorted(os.listdir(bam_folder)):
-    if sample not in ["config", "log"] and sample in sample_list.keys():
-        l_dir = [
-            k
-            for k in os.listdir(bam_folder + "/" + sample + "/bam")
-            if k.endswith(".sort.mdup.bam")
-        ]
-        random.shuffle(l_dir)
-        for j, e in enumerate(l_dir):
-            # if j < 100:
-            if e.endswith(".bam"):
-                cell_dict[sample].append(e.replace(".sort.mdup.bam", ""))
+    print(sample)
+    # Regex to capture Pool[A-Z] or Pool[1-9] or Pool[1-9]NEW
 
+    if sample not in ["config", "log"]:
+        # if sample in sample_list.keys():
+        print(re.search(r"Pool[A-Z]", sample))
+        if re.search(r"Pool[A-Z]", sample):
+            l_dir = [
+                k
+                for k in os.listdir(bam_folder + "/" + sample + "/bam")
+                if k.endswith(".sort.mdup.bam")
+            ]
+            random.shuffle(l_dir)
+            for j, e in enumerate(l_dir):
+                # if j < 100:
+                if e.endswith(".bam"):
+                    cell_dict[sample].append(e.replace(".sort.mdup.bam", ""))
+
+print(cell_dict)
 
 # random.seed(42)
 random_selection = random.sample(
@@ -100,7 +108,9 @@ samples = list(cell_dict.keys())
 # sample_list["Random_for_sanity_check"] = random_selection
 
 
+
 print(sample_list)
+print(samples)
 # exit()
 
 def get_mem_mb_heavy(wildcards, attempt):
@@ -323,6 +333,20 @@ rule merge_concat_bcftools_vcf:
         mem_mb=get_mem_mb_heavy,
     shell:
         "bcftools merge {input.vcf} | bcftools sort --temp-dir /tmpdata/tweber/ | bcftools norm -d none | bcftools view -h -H > {output}"
+
+
+rule index_bam:
+    input:
+        "{bam_folder}/{sample}/bam/{cell_id}.sort.mdup.bam",
+    output:
+        "{bam_folder}/{sample}/bam/{cell_id}.sort.mdup.bam.bai",
+    resources:
+        mem_mb=get_mem_mb,
+        time="01:00:00",
+    envmodules:
+        "SAMtools/1.14-GCC-11.2.0",
+    shell:
+        "samtools index {input}"
 
 
 rule samtools_coverage:
