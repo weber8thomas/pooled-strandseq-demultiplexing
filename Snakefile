@@ -11,31 +11,43 @@ results_folder = config["results_folder"]
 onekgp_vcf_folder = config["onekgp_vcf_folder"]
 bam_folder = config["bam_folder"]
 
+print(results_folder)
+print(onekgp_vcf_folder)
+print(bam_folder)
+
 # list samples in bam folder
 samples = [
     e
     for e in os.listdir(bam_folder)
-    if os.path.isdir(bam_folder + "/" + e) and e not in ["config", "log"] and "pool" in e.lower()
-
+    if os.path.isdir(bam_folder + "/" + e)
+    and e not in ["config", "log"]
+    and "pool" in e.lower()
 ]
 
 
 print(samples)
 
-sample_list = config["samples_pooled"]
+sample_list_raw = config["samples_pooled"]
 # Rename 1KG samples from GM to NA
-sample_list = {k: [e.replace("GM", "NA") for e in v] for k, v in sample_list.items()}
-print(sample_list)
-new_check = True if "NEW" in samples[0] else False
-print(new_check)
-if new_check:
-    sample_list = {k:v for k,v in sample_list.items() if "NEW" in k}
-else:
-    sample_list = {k:v for k,v in sample_list.items() if "NEW" not in k}
-print(sample_list)
-sample_list = {s:v for k,v in sample_list.items() for s in samples if k in s.lower()}
-print(sample_list)
+sample_list_raw = {k: sorted([e.replace("GM", "NA") for e in v]) for k, v in sample_list_raw.items()}
+print(sample_list_raw)
+# new_check = True if "NEW" in samples[0] else False
+# print(new_check)
+# if new_check:
+#     sample_list = {k: v for k, v in sample_list.items() if "NEW" in k}
+# else:
+#     sample_list = {k: v for k, v in sample_list.items() if "NEW" not in k}
+sample_list = dict()
+for s in samples:
+    for k, v in sample_list_raw.items():
+        if k.lower() in s.lower():
+            sample_list[s] = v
+            break
+    
 
+# sample_list = {
+#     s: v for k, v in sample_list.items() for s in samples if k.lower() in s.lower()
+# }
 # list 1kgp files
 onekgp_filelist = [
     e
@@ -44,7 +56,7 @@ onekgp_filelist = [
     )
     if e.endswith(".vcf.gz")
 ]
-print(onekgp_vcf_folder + "/HGSVC2_1KG_3202_VCF_FILES_RENAMED_SYMLINK")
+# print(onekgp_vcf_folder + "/HGSVC2_1KG_3202_VCF_FILES_RENAMED_SYMLINK")
 # print(onekgp_filelist)
 
 # Retrieve header
@@ -73,7 +85,7 @@ random.seed(43)
 # Retrieve list of cells for each Pool sample to be genotyped
 cell_dict = collections.defaultdict(list)
 for sample in sorted(os.listdir(bam_folder)):
-    print(sample)
+    # print(sample)
     # Regex to capture Pool[A-Z] or Pool[1-9] or Pool[1-9]NEW
 
     if sample not in ["config", "log"]:
@@ -91,7 +103,7 @@ for sample in sorted(os.listdir(bam_folder)):
                 if e.endswith(".bam"):
                     cell_dict[sample].append(e.replace(".sort.mdup.bam", ""))
 
-print(cell_dict)
+# print(cell_dict)
 
 # random.seed(42)
 random_selection = random.sample(
@@ -108,10 +120,10 @@ samples = list(cell_dict.keys())
 # sample_list["Random_for_sanity_check"] = random_selection
 
 
-
 print(sample_list)
 print(samples)
 # exit()
+
 
 def get_mem_mb_heavy(wildcards, attempt):
     """
@@ -127,6 +139,22 @@ def get_mem_mb(wildcards, attempt):
     """
     mem_avail = [2, 4, 8, 16, 32, 64]
     return mem_avail[attempt - 1] * 1000
+
+
+print(sample_list.keys())
+print(samples)
+
+
+print(
+    [
+        expand(
+            "{results_folder}/BCFTOOLS_CONCAT_TAB/{sample}/merge.txt.gz",
+            results_folder=results_folder,
+            sample=list(sample_list.keys()),
+        )
+        for sample in samples
+    ],
+)
 
 
 rule all:
@@ -147,7 +175,14 @@ rule all:
             for sample in samples
         ],
         # TODO: CHANGE THIS TO A POOL OUTPUT THAT CAN BE REUSED FOR ALL CORRESPONDING PLATES
-        [expand("{results_folder}/BCFTOOLS_CONCAT_TAB/{sample}/merge.txt.gz", results_folder=results_folder, sample=list(sample_list.keys())) for sample in samples],
+        [
+            expand(
+                "{results_folder}/BCFTOOLS_CONCAT_TAB/{sample}/merge.txt.gz",
+                results_folder=results_folder,
+                sample=list(sample_list.keys()),
+            )
+            for sample in samples
+        ],
         [
             expand(
                 "{results_folder}/COVERAGE/{sample}/MERGE/merge_coverage.txt",
@@ -286,7 +321,10 @@ rule concat_filter_bcftools:
         # 'bcftools view --type snps {input} | cut -f 3,8 | sed "s/$/\\t{wildcards.sample}/g;s/AC=//g;s/AF=//g" |  grep -v "^#" | tail -n+2 | tr ";" "\\t" | bgzip > {output}'
 
 
-localrules: merge_concat_bcftools_tab, merge_concat_bcftools_vcf
+
+localrules:
+    merge_concat_bcftools_tab,
+    merge_concat_bcftools_vcf,
 
 
 rule merge_concat_bcftools_tab:
