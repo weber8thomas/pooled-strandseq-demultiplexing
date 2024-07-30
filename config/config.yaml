@@ -1,9 +1,10 @@
 # results_folder: /scratch/tweber/DATA/1000G_SNV_with_GT/OTF
-results_folder: /scratch/tweber/DATA/MC_DATA/DEMULTIPLEXING_POOLS
+results_folder: /g/korbel2/weber/MosaiCatcher_files/DEMULTIPLEXING_POOLS/DEMULTIPLEXING_POOLS
+# results_folder: /scratch/tweber/DATA/MC_DATA/DEMULTIPLEXING_POOLS
 # results_folder: /scratch/tweber/DATA/HGSVC_POOLS_GENOTYPING
 # onekgp_vcf_folder: /scratch/tweber/DATA/1000G_SNV_with_GT/VCF
 # onekgp_vcf_folder: /scratch/tsapalou/DATA/GENOTYPING/1000G_SNV_with_GT/VCF
-onekgp_vcf_folder: /scratch/tweber/DATA/MC_DATA/DEMULTIPLEXING_POOLS/1000G_SNV_with_GT
+onekgp_vcf_folder: /g/korbel2/weber/MosaiCatcher_files/DEMULTIPLEXING_POOLS/DEMULTIPLEXING_POOLS/1000G_SNV_with_GT
 # bam_folder: /g/korbel2/weber/MosaiCatcher_files/POOLING/POOL1_RESEQ
 # bam_folder: /scratch/tweber/DATA/MC_DATA/DEMULTIPLEXING_POOLS/OLD_POOLS
 bam_folder: /scratch/tweber/DATA/MC_DATA/STOCKS/2024-01-30-AACT75KM5
